@@ -69,7 +69,7 @@ vars_parcel <- c("ParcelID", "LotSize", "LandValue", "ImprovementsValue",
           "Cards")
 
 # select listed variables for parcel level
-# drop records with 2 or cards
+# drop records with 2 or more cards
 # a Parcel of land can have more than one building (ie, card) on it;
 # we only want parcels with one building
 
@@ -82,7 +82,8 @@ other <- other_parcel %>%
   select(ParcelID, ESDistrict:HSDistrict, CensusTract) 
 
 # clean up
-rm(card_level, parcel_level, other_parcel, vars_card, vars_parcel, link, link2, link3)
+rm(card_level, parcel_level, other_parcel, vars_card, vars_parcel, 
+   link, link2, link3)
 
 # merge all three data sets
 homes <- left_join(card, parcel, by = c("TMP" = "ParcelID")) %>% 
