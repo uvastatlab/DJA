@@ -1,0 +1,259 @@
+---
+title: "Introduction to R"
+author: "Clay Ford"
+date: "Summer 2022"
+output: slidy_presentation
+---
+
+```{r setup, include=FALSE}
+library(formatR)
+knitr::opts_chunk$set(echo = TRUE, prompt = TRUE, comment="",
+                      tidy.opts = list(width.cutoff = 50), tidy = TRUE)
+```
+
+## What's the plan?
+
+- Learn essential R concepts.
+- Perform some basic data analysis and graphics.
+- Lay a foundation to go further.
+
+R is big and powerful and takes time to learn. But commit and do the work and you will be rewarded!
+
+## R plus RStudio
+
+- RStudio is an interactive development editor (IDE) _that runs R for you_.
+- You need to install both, but you only need to open RStudio.
+- Opening RStudio also opens R.
+- RStudio makes using and learning R easier (in my opinion)
+
+## The R Console
+
+- Opening R/RStudio begins an _R session_.
+- The Console is the R program.
+- We enter _expressions_ at the Console prompt (`>`), hit Enter, and R _evaluates_ the expression and returns output.
+- For example, the Console can be used as a calculator:
+
+```{r}
+22/7
+```
+
+R evaluates the mathematical expression and returns the answer. Math operators include `+`, `-`, `*`, `/`, `^` (exponent), `%%` (division remainder), and `%/%` (division quotient)
+
+## Assignment
+
+- If we want to _save_ the output, we assign it a name.
+- To do this we use the assignment operator: `<-` 
+- Keyboard shortcut: `Alt + -` (Win/Linux) or `Option + -` (Mac).
+- A name must begin with a letter and not contain spaces.
+- For example, save our calculation as "Pi":
+
+```{r}
+Pi <- 22/7
+```
+
+R evaluates the expression and assigns it the name `Pi`. `Pi` is now an _object_ in memory. R is case sensitive. "Pi" and "pi" are different. (`pi` is a built-in constant: 3.141593)
+ 
+Note: You can also use `=` but most style guides recommend `<-`. There are subtle differences that go beyond the scope of this workshop.
+
+## Functions
+
+- R uses _functions_ to work with objects.
+- Functions take _arguments_ inside parentheses.
+- Example: the `sqrt` function takes the square root of a numeric object. In this example, the `Pi` object is the argument.
+
+
+```{r}
+sqrt(Pi)
+```
+
+Another function is `round`. Notice the second argument allows us to specify number of digits. Arguments are separated by commas.
+
+```{r}
+round(Pi, digits = 2)
+```
+
+## Data
+
+- The main reason to use R is for the statistical analysis and visualization of data. To do that we need to _import_ data into R.
+- R can import virtually any type of data file.
+- A common data file is CSV. The `read.csv` function imports CSV files.
+- Example: import a CSV file named `albemarle_homes.csv` and save as an object named `homes`:
+
+```{r echo=FALSE}
+homes <- read.csv("https://github.com/uvastatlab/DJA/raw/main/data/albemarle_homes_2022.csv")
+```
+
+
+```{r eval=FALSE}
+homes <- read.csv('albemarle_homes.csv')
+```
+
+
+We place the file name in quotes since it's the name of a file and not a function or object.
+
+The result is an object called `homes` that is stored in memory and available for use in R.
+
+## Working directories
+
+- The function `read.csv("albemarle_homes.csv")` tells R to import a CSV file named "albemarle_homes.csv". Where does it look for it?
+- Answer: the _working directory_
+- The working directory is where your computer looks for or saves files (assuming you don't tell it where to look).
+- The current working directory is listed at the top of the Console window in RStudio.
+- If the file is not in the working directory R returns an error message.
+
+```{r error = TRUE}
+homes <- read.csv('survey.csv')
+```
+
+
+## Setting the working directory
+
+- You can manually set the working directory in RStudio by going to **Session...Set Working Directory...Choose Directory...**
+- You can also set it using the `setwd` function. For example:
+```{r eval=FALSE}
+setwd("/Users/clayford/projects/evil_plan/data")
+```
+
+- `"/Users/clayford/projects/evil_plan/data"` is called a _file path_.
+- Starting a path with `/` means start from your _root_ directory.
+- Starting a path with `~/` means start from your _home_ directory.
+- Hitting `Tab` after `/` or `~/` in RStudio will open a list of available folders and allow you to drill down to the desired directory.
+- Can also use paths in functions like `read.csv`.
+
+```{r eval=FALSE}
+d <- read.csv("/Users/clayford/data/scores.csv")
+```
+
+
+## Data frames
+
+- Rectangular data structures such as CSV files are read in as _data frames_.
+- The columns are usually _variables_, such as gender, income, volume, mass, score, treatment, date, state, group, etc.
+- The rows are usually _observations_.
+- We can extract a column using the `$` operator:
+
+```{r}
+median(homes$TotalValue)
+```
+
+The `median` function calculates the median of the `TotalValue` column of the `homes` data frame.
+
+## Vectors
+
+- Columns of data frames are known as _vectors_. 
+- Vectors contain the same _type_ of data (numeric, character, etc)
+- We can create our own vectors using the `c` function.
+- Many R functions are _vectorized_, meaning they work on vectors.
+- Example: The `nchar` functions counts number of characters in a phrase
+
+```{r}
+nchar(c("Virginia", "Maryland", "West Virginia"))
+```
+
+We didn't have to "loop" through the values of the vector. Since `nchar` is vectorized, it did it for us.
+
+## R scripts
+
+- Instead of entering functions in the Console one at a time, we often will write multiple lines of _R code_ in a script.
+- A script is a text file with a `.R` extension.
+- When we work with scripts we can submit one or more _lines of code_ to the Console. 
+- We can also save our code and share with colleagues.
+- To start a new R Script, go to **File...New File...R Script**.
+
+
+## Working in R scripts
+
+- Writing code in an R script is like writing text. Hitting Enter starts a new line.
+- To submit a line of R code from a script: place the cursor in the line and hit `Ctrl + Enter` (Win/Linux) or `Cmd + Return` (Mac).
+- To submit a _many lines_ of R code from a script: highlight the lines and hit `Ctrl + Enter` (Win/Linux) or `Cmd + Return` (Mac).
+- Any output is printed in the R console.
+- RStudio allows you to have multiple R scripts open.
+- Text prefaced with `#` are treated as _comments_. These are notes about the R code that are not evaluated.
+- In this workshop we'll work through and review a R script I have already written: `Intro_R_2021.R`
+
+
+## R packages
+
+- Just as you can install apps on your phone, you can install _packages_ in R.
+- Packages are collections of functions that serve a particular purpose.
+- Example: The {readxl} package provides functions for importing Excel files.
+- Packages are free to install and require an internet connection.
+- In RStudio, go to **Tools...Install R packages...**, enter the package name(s) and click Install.
+- To access functions in a package, use the `library` function to _load_ the package. Example: load {readxl} so we can use the `read_excel` function
+
+```{r eval=FALSE}
+library(readxl)
+d <- read_excel('data.xlsx')
+```
+
+- Packages only need to be installed once, but loaded every new R session.
+- To check for package updates, go to **Tools...Check for Package Updates...**
+
+## How do I know which R packages I need?
+
+- You will learn from colleagues, classes, books, conferences, blog posts, Twitter, Reddit, Googling for help, and so on.
+- There are thousands of R packages; you will never use or need them all.
+- When you install R, you get about 30 "recommended" packages collectively known as _base R_.
+- To see what packages you have installed, click the Packages tab in RStudio.
+- Most R packages are developed by individuals; some are well-maintained and well-documented, others not so much.
+
+## Getting Help
+
+- Your best bet is Googling an error message or searching for what you need help with; it's probably been answered before
+- Typing `?` before a function in the console and hitting Enter will take you to a help page for that function. (eg, `?substr`)
+- At the bottom there will usually be examples of how to use the function.
+- The `example` function will run the examples for you so you can examine what the function does. (eg, `example(substr)`)
+- You can also highlight example code in RStudio and hit `Ctrl + Enter` (Win/Linux) or `Cmd + Return` (Mac) to run the code.
+- Quality of examples vary; some are terse and minimal, some are treasure troves of useful R code.
+
+## A basic analysis workflow in R
+
+1. Import data into R 
+2. Clean or "wrangle" the data if needed
+3. Analyze and visualize data
+
+We'll walk through an example analysis in R and talk about these steps.
+
+Steps 1 and 2 require various levels of R expertise.
+
+Step 3 requires not just R expertise, but also statistical and subject matter knowledge.
+
+Let's open the R script `Intro_R_2021.R`
+
+## Keep learning R
+
+- I encourage you to take more Introductory R classes and workshops. There are many opinions about how to teach and use R.
+- Other Intro to R workshops will almost certainly emphasize different functions and "best practices".
+- Subscribe to R Weekly, a round up of tutorials, blog posts and news about R: https://feedburner.google.com/fb/a/mailverify?uri=rweekly&loc=en_US
+- Search YouTube for "getting started with R"
+
+
+## Online tutorials and books
+
+**Other Intro to R tutorials**
+
+- fasteR: Fast Lane to Learning R!   
+https://github.com/matloff/fasteR
+
+- Getting Started in R: Tinyverse Edition  
+https://eddelbuettel.github.io/gsir-te/Getting-Started-in-R.pdf
+
+- The Original Intro to R   
+https://cran.r-project.org/doc/manuals/r-release/R-intro.html
+
+**Online Books**
+
+- Modern Data Science with R  
+https://mdsr-book.github.io/mdsr2e/
+
+- R for Data Science  
+https://r4ds.had.co.nz/
+
+## Thank you
+
+- For help and advice with R and statistical analyses: statlab@virginia.edu
+
+- Sign up for more workshops or see past workshops:
+http://data.library.virginia.edu/training/
+
+- Register for the Research Data Services newsletter to be notified of new workshops: http://data.library.virginia.edu/newsletters/
