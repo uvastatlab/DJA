@@ -140,7 +140,8 @@ homes <- homes %>%
   mutate(FP = if_else(FP_Open == 0, 0, 1))
 
 homes <- homes %>% 
-  select(-c(TMP, CardNum))
+  select(-c(TMP, CardNum)) %>% 
+  rename(LastSaleDate = LastSaleDate1)
 
 rm(cond_levels)
 
