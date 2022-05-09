@@ -48,7 +48,7 @@
 # Set your working directory to the folder on the computer that contains the
 # workshop files.
 
-
+setwd("")
 
 
 # Loading data ------------------------------------------------------------
@@ -75,7 +75,7 @@
 # (1) read file from working directory on computer. If we've already set our 
 # working directory to the location where the CSV file is located, we just need
 # to put the name of the file in quotes.
-homes <- read.csv("albemarle_homes.csv")
+homes <- read.csv("albemarle_homes_2022.csv")
 
 # (2) read from a web site. If the file is on the web, simply copy-and-paste the
 # URL and enclose in quotes:
@@ -107,7 +107,7 @@ summary(homes)
 # Accessing columns of data -----------------------------------------------
 
 # We can access the column of a data frame by using `$`. Example:
-homes$yearbuilt
+homes$YearBuilt
 
 # Tip: use Ctrl + L to clear console
 
@@ -118,33 +118,33 @@ homes$yearbuilt
 # We sometimes want to work with columns of the data frame
 
 # basic summary stats for numeric columns
-summary(homes$totalvalue)
+summary(homes$TotalValue)
 
 # first 6 values
-head(homes$totalvalue)
+head(homes$TotalValue)
 
 # basic histogram to visualize the distribution of TotalValue
-hist(homes$totalvalue)
+hist(homes$TotalValue)
 
 # simple scatterplot of TotalValue versus FinSqFt
-plot(x = homes$finsqft, y = homes$totalvalue)
+plot(x = homes$FinSqFt, y = homes$TotalValue)
 
 # Counts of homes by high school district
-table(homes$hsdistrict)
+table(homes$HSDistrict)
 
 # CODE ALONG #2 -----------------------------------------------------------
 
-# (1) Use the summary() function on the fullbath column of the homes data frame.
+# (1) Use the summary() function on the FullBath column of the homes data frame.
 # Does the mean make sense?
 
 
 
-# (2) Use the table() function on the fullbath column of the homes data frame.
+# (2) Use the table() function on the FullBath column of the homes data frame.
 # How many homes have 0 full baths? What's the most common number of full baths?
 
 
 
-# (3) How many homes are in "Substandard" condition?
+# (3) How many homes are in "Very Poor" condition?
 
 
 
@@ -153,8 +153,8 @@ table(homes$hsdistrict)
 # We often want to extract a subset of our data that meets a certain condition.
 
 # - All homes in Average or better condition
-# - All homes in Charlottesville
-# - All homes in Charlottesville built before 2000
+# - All homes with more than 3000 FinSqFt
+# - All homes built after 2000 in the Albemarle HS District
 
 # We can subset our data using the subset() function. 
 # The basic syntax is subset(data, condition). 
@@ -169,14 +169,18 @@ table(homes$hsdistrict)
 
 # Show homes with TotalValue greater than 10,000,000
 # 1e7 = 10,000,000 (ie, 1 with 7 zeroes after it)
-subset(homes, totalvalue > 5e6)
+subset(homes, TotalValue > 1e7)
 
 # Show all homes with a Condition of Very Poor (notice we use two equal signs)
-subset(homes, condition == "Very Poor")
+subset(homes, Condition == "Very Poor")
 
-# Show homes in CHARLOTTESVILLE built after 2000 with more than 6 FullBaths
+# Sometimes it can help to view the results using View()
+View(subset(homes, Condition == "Very Poor"))
+
+
+# Show homes in "Very Poor" condition built before 1900
 # (use & for AND, use | for OR)
-subset(homes, City == "CHARLOTTESVILLE" & YearBuilt > 2000 & FullBath > 6)
+View(subset(homes, Condition == "Very Poor" & YearBuilt < 1800))
 
 
 # We may want to save our subsetted data into a new data frame.
@@ -230,8 +234,8 @@ homes$After2008 <- ifelse(homes$YearBuilt >= 2008, 1, 0)
 # to use a categorical variable in a statistical analysis such as regression. We
 # can use the factor() function for this. 
 
-# Convert City column to factor
-homes$City <- factor(homes$City)
+# Convert Condition column to factor
+homes$Condition <- factor(homes$Condition)
 
 
 # (4) Setting the order of levels in a factor
@@ -239,7 +243,6 @@ homes$City <- factor(homes$City)
 # After creating a factor, we may want the levels in a certain order.
 
 # Notice the order of Condition: alphabetical
-homes$Condition <- factor(homes$Condition)
 levels(homes$Condition)
 table(homes$Condition)
 
@@ -247,7 +250,7 @@ table(homes$Condition)
 # Let's set the order to Substandard, Poor, Fair, Average, Good, Excellent;
 # We can do that with the factor function and the levels argument
 homes$Condition <- factor(homes$Condition, 
-                          levels = c("Substandard", "Poor", "Fair", 
+                          levels = c("Not Rated", "Very Poor", "Poor", "Fair", 
                                      "Average", "Good", "Excellent"))
 
 # Now the results are in the desired order
@@ -265,8 +268,8 @@ homes$After2008 <- NULL
 # CODE ALONG #4 -----------------------------------------------------------
 
 
-# Let's add an indicator called Remodeled that has 1 if a home has been
-# remodeled and a 0 otherwise.
+# Let's add an indicator called Pre20thCentury that has 1 if a home was built
+# before 1900 and a 0 otherwise
 
 
 
@@ -276,54 +279,54 @@ homes$After2008 <- NULL
 
 # to calculate frequencies of a factor or character variable use the table
 # function:
-table(homes$condition) 
+table(homes$Condition) 
 
 
 # Of course we already saw that table works on numeric variables as well. Best
 # to use with integers.
-table(homes$halfbath)
+table(homes$HalfBath)
 
 # find mean of numeric columns
-mean(homes$totalvalue)
-mean(homes$totalrooms) # NA?
+mean(homes$TotalValue)
+mean(homes$TotalRooms) # NA?
 
 # By default R returns NA (not available) for certain calculations if there is
 # any missing data. Use na.rm=TRUE to override:
-mean(homes$totalrooms, na.rm = TRUE)
+mean(homes$TotalRooms, na.rm = TRUE)
 
 # How many missing?
-summary(homes$totalrooms)
+summary(homes$TotalRooms)
 
 # Which homes have missing total rooms? Use is.na() as condition to subset
-subset(homes, is.na(totalrooms))
+subset(homes, is.na(TotalRooms))
 
 # A few other summary functions
-median(homes$totalvalue)
-sd(homes$totalvalue) # standard deviation
-range(homes$totalvalue) # returns min and max values; see also min() and max()
+median(homes$TotalValue)
+sd(homes$TotalValue) # standard deviation
+range(homes$TotalValue) # returns min and max values; see also min() and max()
 
 # Counting number of conditions satisfied
 
 # How many homes have a TotalValue over 1 million?
 
 # The following generates a vector of TRUE/FALSE values:
-homes$totalvalue > 1e6
+homes$TotalValue > 1e6
 
 # In R, TRUE = 1 and FALSE = 0, so we can do math with TRUE/FALSE values. How
 # many TRUES?
-sum(homes$totalvalue > 1e6)
+sum(homes$TotalValue > 1e6)
 
 
 # Proportion of homes with TotalValue over 1 million:
 # Taking the mean of 0,1 data returns percent of 1's
-mean(homes$totalvalue > 1e6)
+mean(homes$TotalValue > 1e6)
 
 # How many homes with a totalrooms greater than 10?
-sum(homes$totalrooms > 10)
+sum(homes$TotalRooms > 10)
 
 # We have NAs in the LotSize column, so we need to tell R to ignore them:
-sum(homes$totalrooms > 10, na.rm = TRUE)
-mean(homes$totalrooms > 10, na.rm = TRUE)
+sum(homes$TotalRooms > 10, na.rm = TRUE)
+mean(homes$TotalRooms > 10, na.rm = TRUE)
 
 
 
@@ -341,20 +344,20 @@ mean(homes$totalrooms > 10, na.rm = TRUE)
 # for contingency tables (or cross tabs) use the table function
 # syntax: table(row variable, column variable)
 
-# cross tab of Remodeled and City
-table(homes$remodel, homes$hsdistrict)
+# cross tab of Remodeled and HS Disrict
+table(homes$Remodeled, homes$HSDistrict)
 
 # calculate percents with the proportions() function. 
 
 # First we save the table object as tab1
-tab1 <- table(homes$remodel, homes$hsdistrict)
+tab1 <- table(homes$Remodeled, homes$HSDistrict)
 
 # print the table
 tab1
 
 # proportions by Remodeled; rows proportions sum to 1
 proportions(tab1, margin = 1) 
-# proportions by City; columns proportions sum to 1
+# proportions by HSDistrict; columns proportions sum to 1
 proportions(tab1, margin = 2) 
 
 # use the round() function to round the number of decimals to a certain number
@@ -368,19 +371,19 @@ round(proportions(tab1, margin = 2), 2)
 # NOTE: aggregate ignores missing data by default
 
 # median home value by hsdistrict
-aggregate(totalvalue ~ hsdistrict, data = homes, median)
+aggregate(TotalValue ~ HSDistrict, data = homes, median)
 
-# mean home value by City
-aggregate(totalvalue ~ hsdistrict, data = homes, mean)
+# mean home value by HSDistrict
+aggregate(TotalValue ~ HSDistrict, data = homes, mean)
 
-# median TotalValue by City and Remodeled
-aggregate(totalvalue ~ remodel + hsdistrict, homes, median)
+# median TotalValue by Remodeled and HSDistrict
+aggregate(TotalValue ~ Remodeled + HSDistrict, homes, median)
 
 
 
 # CODE ALONG #6 -----------------------------------------------------------
 
-# Find the mean FinSqFt by hsdistrict
+# Find the mean FinSqFt by HSDistrict
 
 
 
@@ -417,8 +420,8 @@ hist(log(homes$TotalValue)) # more symmetric
 # variable; visualize the five number summary (Min, 25%, Median, 75%, Max)
 
 # boxplot(numeric ~ group)
-boxplot(FinSqFt ~ City, data = homes, 
-        main = "Finished Sq Ft by City")
+boxplot(FinSqFt ~ Condition, data = homes, 
+        main = "Finished Sq Ft by Condition")
 
 
 
@@ -462,23 +465,18 @@ library(ggplot2)
 ggplot(homes, aes(x = FinSqFt, y = TotalValue)) + 
   geom_point()
 
-# separate plot for each City
+# separate plot for each HSDistrict
 ggplot(homes, aes(x = FinSqFt, y = TotalValue)) + 
   geom_point() +
-  facet_wrap(~City)
+  facet_wrap(~HSDistrict)
 
 # add smooth trend line
 ggplot(homes, aes(x = FinSqFt, y = TotalValue)) + 
   geom_point() +
   geom_smooth() +
-  facet_wrap(~City)
+  facet_wrap(~HSDistrict)
 
-
-# To learn more about ggplot2, see my past workshop: 
-# Visualization in R with ggplot2 
-# http://data.library.virginia.edu/statlab/past-workshops/
-
-
+# We'll cover more ggplot2 in the data visualization workshop
 
 # Basic statistics examples -----------------------------------------------
 
@@ -489,8 +487,9 @@ t.test(TotalValue ~ Remodeled, data = homes)
 
 # ANOVA: Comparing more than two means
 
-# Does mean TotalValue differ between Cities?
-aov.out <- aov(TotalValue ~ City, data = homes)
+# Does mean TotalValue differ between HSDistrict?
+aov.out <- aov(TotalValue ~ HSDistrict, 
+               data = subset(homes, HSDistrict != "Unassigned"))
 summary(aov.out)
 
 # Where are the differences? Get pairwise differences with Tukey's Honestly Significant Differences.
@@ -526,15 +525,13 @@ mod2 <- lm(log(TotalValue) ~ log(FinSqFt), data = homes)
 summary(mod2) 
 
 # Interpretation:  A 1% increase square footage increases TotalValue by about
-# 1.2% (If this is a good model)
+# 1.1% (If this is a good model)
 
-# check "residual vs fitted" plot. This looks much better.
+# check "residual vs fitted" plot. This looks better.
 plot(mod2, which = 1)
 
 
-# To learn more, see my past workshop: Linear Modeling with R 
-# http://data.library.virginia.edu/statlab/past-workshops/
-
+# We'll learn more about linear modeling in the linear modeling workshop.
 
 
 # Saving R objects --------------------------------------------------------
@@ -594,9 +591,9 @@ homes[1:6,]
 homes[,2:3] 
 
 # can also use column names; they need to be entered as a "vector"
-homes[1:6,c("TotalValue","City")]
+homes[1:6,c("TotalValue","CensusTract")]
 
-# c("TotalValue","City") creates a "vector"; the c() function means "combine"
+# c("TotalValue","CensusTract") creates a "vector"; the c() function means "combine"
 
 # First 10 cells of the TotalValue column
 homes$TotalValue[1:10]

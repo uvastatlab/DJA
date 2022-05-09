@@ -107,12 +107,12 @@ table(homes$Condition, useNA = "ifany") # re-order levels of factor
 homes <- homes %>% 
   mutate(Condition = if_else(is.na(Condition) | 
                                Condition == "Unknown",
-                             "None",
+                             "Not Rated",
                              Condition))
 
 # set condition to factor
 cond_levels <- c("Very Poor", "Poor", "Fair", "Average", "Good", 
-                 "Excellent", "None") # define levels/order
+                 "Excellent", "Not Rated") # define levels/order
 
 homes <- homes %>% 
   mutate(Condition = fct_relevel(Condition, cond_levels))
@@ -155,8 +155,8 @@ saveRDS(homes, file = "albemarle_homes_2022.rds")
 # save a csv file of the homes data
 write_csv(homes, file = "albemarle_homes_2022.csv") 
 
-file.remove(c("CityView_View_OtherParcelCharacteristics.txt", 
-              "GIS_CardLevelData_new.txt", 
-              "GIS_View_Redacted_ParcelInfo.txt"))
+# file.remove(c("CityView_View_OtherParcelCharacteristics.txt", 
+#               "GIS_CardLevelData_new.txt", 
+#               "GIS_View_Redacted_ParcelInfo.txt"))
 
 # homes <- read_csv("albemarle_homes_2020.csv")
