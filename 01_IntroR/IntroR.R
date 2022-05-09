@@ -2,8 +2,7 @@
 # Data Justice Academy
 # Summer 2022
 
-# Clay Ford
-# UVA Library - Research Data Services
+# Clay Ford, UVA Library
 
 
 # Welcome to R! -----------------------------------------------------------
@@ -80,7 +79,7 @@ homes <- read.csv("albemarle_homes.csv")
 
 # (2) read from a web site. If the file is on the web, simply copy-and-paste the
 # URL and enclose in quotes:
-homes <- read.csv("https://github.com/clayford/IntroR_2021/raw/main/albemarle_homes.csv")
+homes <- read.csv("https://github.com/uvastatlab/DJA/raw/main/data/albemarle_homes_2022.csv")
 
 # (3) use the RStudio "Import Dataset" button in the Environment window. Click
 # on "Import Dataset", select "From Text (base)...", and navigate to file.
@@ -108,7 +107,7 @@ summary(homes)
 # Accessing columns of data -----------------------------------------------
 
 # We can access the column of a data frame by using `$`. Example:
-homes$YearBuilt
+homes$yearbuilt
 
 # Tip: use Ctrl + L to clear console
 
@@ -119,28 +118,28 @@ homes$YearBuilt
 # We sometimes want to work with columns of the data frame
 
 # basic summary stats for numeric columns
-summary(homes$TotalValue)
+summary(homes$totalvalue)
 
 # first 6 values
-head(homes$TotalValue)
+head(homes$totalvalue)
 
 # basic histogram to visualize the distribution of TotalValue
-hist(homes$TotalValue)
+hist(homes$totalvalue)
 
 # simple scatterplot of TotalValue versus FinSqFt
-plot(x = homes$FinSqFt, y = homes$TotalValue)
+plot(x = homes$finsqft, y = homes$totalvalue)
 
-# Counts of homes by City
-table(homes$City)
+# Counts of homes by high school district
+table(homes$hsdistrict)
 
 # CODE ALONG #2 -----------------------------------------------------------
 
-# (1) Use the summary() function on the FullBath column of the homes data frame.
+# (1) Use the summary() function on the fullbath column of the homes data frame.
 # Does the mean make sense?
 
 
 
-# (2) Use the table() function on the FullBath column of the homes data frame.
+# (2) Use the table() function on the fullbath column of the homes data frame.
 # How many homes have 0 full baths? What's the most common number of full baths?
 
 
@@ -170,10 +169,10 @@ table(homes$City)
 
 # Show homes with TotalValue greater than 10,000,000
 # 1e7 = 10,000,000 (ie, 1 with 7 zeroes after it)
-subset(homes, TotalValue > 1e7)
+subset(homes, totalvalue > 5e6)
 
-# Show all homes with a Condition of Substandard (notice we use two equal signs)
-subset(homes, Condition == "Substandard")
+# Show all homes with a Condition of Very Poor (notice we use two equal signs)
+subset(homes, condition == "Very Poor")
 
 # Show homes in CHARLOTTESVILLE built after 2000 with more than 6 FullBaths
 # (use & for AND, use | for OR)
@@ -277,54 +276,54 @@ homes$After2008 <- NULL
 
 # to calculate frequencies of a factor or character variable use the table
 # function:
-table(homes$Condition) 
+table(homes$condition) 
 
 
 # Of course we already saw that table works on numeric variables as well. Best
 # to use with integers.
-table(homes$HalfBath)
+table(homes$halfbath)
 
 # find mean of numeric columns
-mean(homes$TotalValue)
-mean(homes$LotSize) # NA?
+mean(homes$totalvalue)
+mean(homes$totalrooms) # NA?
 
 # By default R returns NA (not available) for certain calculations if there is
 # any missing data. Use na.rm=TRUE to override:
-mean(homes$LotSize, na.rm = TRUE)
+mean(homes$totalrooms, na.rm = TRUE)
 
 # How many missing?
-summary(homes$LotSize)
+summary(homes$totalrooms)
 
-# Which homes have missing lot size? Use is.na() as condition to subset
-subset(homes, is.na(LotSize))
+# Which homes have missing total rooms? Use is.na() as condition to subset
+subset(homes, is.na(totalrooms))
 
 # A few other summary functions
-median(homes$TotalValue)
-sd(homes$TotalValue) # standard deviation
-range(homes$TotalValue) # returns min and max values; see also min() and max()
+median(homes$totalvalue)
+sd(homes$totalvalue) # standard deviation
+range(homes$totalvalue) # returns min and max values; see also min() and max()
 
 # Counting number of conditions satisfied
 
 # How many homes have a TotalValue over 1 million?
 
 # The following generates a vector of TRUE/FALSE values:
-homes$TotalValue > 1e6
+homes$totalvalue > 1e6
 
 # In R, TRUE = 1 and FALSE = 0, so we can do math with TRUE/FALSE values. How
 # many TRUES?
-sum(homes$TotalValue > 1e6)
+sum(homes$totalvalue > 1e6)
 
 
 # Proportion of homes with TotalValue over 1 million:
 # Taking the mean of 0,1 data returns percent of 1's
-mean(homes$TotalValue > 1e6)
+mean(homes$totalvalue > 1e6)
 
-# How many homes with a LotSize greater than 1 acre?
-sum(homes$LotSize > 1)
+# How many homes with a totalrooms greater than 10?
+sum(homes$totalrooms > 10)
 
 # We have NAs in the LotSize column, so we need to tell R to ignore them:
-sum(homes$LotSize > 1, na.rm = TRUE)
-mean(homes$LotSize > 1, na.rm = TRUE)
+sum(homes$totalrooms > 10, na.rm = TRUE)
+mean(homes$totalrooms > 10, na.rm = TRUE)
 
 
 
@@ -343,12 +342,12 @@ mean(homes$LotSize > 1, na.rm = TRUE)
 # syntax: table(row variable, column variable)
 
 # cross tab of Remodeled and City
-table(homes$Remodeled, homes$City)
+table(homes$remodel, homes$hsdistrict)
 
 # calculate percents with the proportions() function. 
 
 # First we save the table object as tab1
-tab1 <- table(homes$Remodeled, homes$City)
+tab1 <- table(homes$remodel, homes$hsdistrict)
 
 # print the table
 tab1
@@ -368,20 +367,20 @@ round(proportions(tab1, margin = 2), 2)
 # Read "~" as "grouped by"
 # NOTE: aggregate ignores missing data by default
 
-# median home value by City
-aggregate(TotalValue ~ City, data = homes, median)
+# median home value by hsdistrict
+aggregate(totalvalue ~ hsdistrict, data = homes, median)
 
 # mean home value by City
-aggregate(TotalValue ~ City, data = homes, mean)
+aggregate(totalvalue ~ hsdistrict, data = homes, mean)
 
 # median TotalValue by City and Remodeled
-aggregate(TotalValue ~ Remodeled + City, homes, median)
+aggregate(totalvalue ~ remodel + hsdistrict, homes, median)
 
 
 
 # CODE ALONG #6 -----------------------------------------------------------
 
-# Find the mean FinSqFt by City
+# Find the mean FinSqFt by hsdistrict
 
 
 

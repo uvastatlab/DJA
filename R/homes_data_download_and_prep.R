@@ -51,153 +51,98 @@ other_parcel <- read.csv("CityView_View_OtherParcelCharacteristics.txt",
                          na.strings = c("NULL", "N/A"))
 
 # card_level list of variables to keep
-vars <- c("TMP", "CardNum", "YearBuilt", "YearRemodeled", 
+vars_card <- c("TMP", "CardNum", "YearBuilt", "YearRemodeled", 
           "UseCode", "Condition", "NumStories", "FinSqFt", "Cooling", 
           "FP_Open", "Bedroom", "FullBath", "HalfBath", "TotalRooms")
 
 # select listed variables, add variable for source
+# keep only residential home records (e.g., not businesses, apartment complexes)
+# keep only records with CardNum = 1
 card <- card_level %>% 
-  select(all_of(vars)) %>% 
-  mutate(source = "card")
+  select(all_of(vars_card)) %>% 
+  filter(UseCode %in% c("Duplex", "Single Family", "Single Family-Rental")) %>% 
+  filter(CardNum == 1)
 
 # parcel_level list of variables to keep
-vars <- c("ParcelID", "Owner", "LotSize", "PropName",
-          "LandValue", "LandUseValue", "ImprovementsValue", 
+vars_parcel <- c("ParcelID", "LotSize", "LandValue", "ImprovementsValue", 
           "TotalValue", "LastSalePrice", "LastSaleDate1", 
           "Cards")
 
-# select listed variables, add variable for source = parcel
+# select listed variables for parcel level
+# drop records with 2 or cards
+# a Parcel of land can have more than one building (ie, card) on it;
+# we only want parcels with one building
+
 parcel <- parcel_level %>% 
-  select(all_of(vars)) %>% 
-  mutate(source = "parcel")
+  select(all_of(vars_parcel)) %>% 
+  filter(Cards < 2)
 
-
-# select variables, add variable for source = parcel
+# select other parcel variables
 other <- other_parcel %>% 
-  select(ParcelID, ESDistrict:HSDistrict, CensusTract) %>% 
-  mutate(source = "other")
+  select(ParcelID, ESDistrict:HSDistrict, CensusTract) 
 
 # clean up
-rm(card_level, parcel_level, other_parcel, vars)
+rm(card_level, parcel_level, other_parcel, vars_card, vars_parcel, link, link2, link3)
 
-# Merge card level data with parcel level, other parcel data 
-parcel <- parcel %>% 
-  left_join(other, by = "ParcelID")
+# merge all three data sets
+homes <- left_join(card, parcel, by = c("TMP" = "ParcelID")) %>% 
+  left_join(other, by = c("TMP" = "ParcelID"))
 
-parcel <- parcel %>% 
-  select(-source.y) %>% 
-  rename(source = source.x)
-
-homes <- full_join(card, parcel, by = c("TMP" = "ParcelID"))
-
-# b. card and parcel is many to one -- parcels can have multiple cards
-homes <- full_join(card, parcel, by = c("TMP" = "ParcelID"))
-
-
-
-# keep only records in both cards and parcels
-# drop source
+# keep rows with TotalValue not missing and greater than 0
 homes <- homes %>% 
-  filter(!is.na(source.y) & !is.na(source.x)) %>% 
-  select(-c(source.y, source.x))
+  filter(!is.na(TotalValue) & TotalValue > 0)
 
-# fix names
-names(homes) <- tolower(names(homes))
-
-# keep only residential home records (e.g., not businesses, apartment complexes)
-res <- c("Duplex", "Single Family", "Single Family-Rental")
-
+# keep rows with FinSqFt not missing and greater than 0
 homes <- homes %>% 
-  filter(usecode %in% res)
-
-# set some features to factors
-facvar <- c("cooling", "esdistrict", "msdistrict",
-            "hsdistrict", "censustract")
-
-homes <- homes %>% mutate_at(facvar, as.factor)
-
-# sale date should be date
-homes <- homes %>% 
-  rename(lastsaledate = lastsaledate1) %>% 
-  mutate(lastsaledate = lubridate::mdy(lastsaledate))
-
-# remove the rows with TotalValue 0 or NA
-homes <- homes %>% 
-  filter(!is.na(totalvalue) & totalvalue > 0)
-
-# remove rows with finsqft >= 10000, = 0, or missing
-homes <- homes %>% 
-  filter(!is.na(finsqft) & finsqft > 0 & finsqft < 10000)
-
-# remove records with 2 or more cards associated with parcel
-homes <- homes %>% 
-  filter(cards < 2)
-
+  filter(!is.na(FinSqFt) & FinSqFt > 0)
 
 # more likely to use this as age than year, create age of home
 homes <- homes %>% 
-  mutate(age = 2022 - yearbuilt)
-
-# impute median value within census tract for missing
-tract_age <- homes %>% 
-  group_by(censustract) %>% 
-  summarize(med_age = round(median(age, na.rm = TRUE)))
-
-homes <- left_join(homes, tract_age, by = "censustract")
-
-homes <- homes %>% 
-  mutate(age = if_else(is.na(age), med_age, age))
-rm(tract_age)
+  mutate(Age = 2022 - YearBuilt)
 
 # condition
-table(homes$condition, useNA = "ifany") # re-order levels of factor
+table(homes$Condition, useNA = "ifany") # re-order levels of factor
 
 # combine unknown and NA into none and relevel
 homes <- homes %>% 
-  mutate(condition = if_else(is.na(condition) | 
-                               condition == "Unknown",
+  mutate(Condition = if_else(is.na(Condition) | 
+                               Condition == "Unknown",
                              "None",
-                             condition))
+                             Condition))
 
 # set condition to factor
 cond_levels <- c("Very Poor", "Poor", "Fair", "Average", "Good", 
                  "Excellent", "None") # define levels/order
 
 homes <- homes %>% 
-  mutate(condition = fct_relevel(condition, cond_levels))
+  mutate(Condition = fct_relevel(Condition, cond_levels))
 
-table(homes$condition)
+table(homes$Condition)
 
 # yearremodeled -> remodel indicator
-summary(homes$yearremodeled) # NA not remodeled; not sure about 2 or 8
+summary(homes$YearRemodeled) # NA not remodeled; not sure about 8
 homes <- homes %>% 
-  mutate(remodel = if_else(!is.na(yearremodeled), 1, 0))
+  mutate(Remodeled = if_else(!is.na(YearRemodeled), 1, 0))
 
-# drop numstories
-homes <- homes %>% select(-numstories)
-
+# drop NumStories and Cards
+homes <- homes %>% select(-c(NumStories, Cards))
 
 # cooling
-summary(homes$cooling) # fix factor -- assume 00, M1, and NULL are no air
+table(homes$Cooling) # fix factor -- assume 00, M1, and NULL are no air
 homes <- homes %>% 
-  mutate(cooling = fct_collapse(cooling, 
+  mutate(Cooling = fct_collapse(Cooling, 
                                 "No Central Air" = c("00", "M1", "")))
 
 
 # fp_open (these are characters)
-table(homes$fp_open) # make a binary indicator, 0 and Null are none
+table(homes$FP_Open) # make a binary indicator, 0 and Null are none
 homes <- homes %>% 
-  mutate(fp = if_else(fp_open == 0, 0, 1))
-
-# create binary indicator for land use (land generates revenue)
-homes <- homes %>% 
-  mutate(landuse = if_else(landusevalue > 0, 1, 0)) %>% 
-  select(-landusevalue) # remove variable
+  mutate(FP = if_else(FP_Open == 0, 0, 1))
 
 homes <- homes %>% 
-  select(-c(tmp, cardnum, fp_open, owner, propname, cards, med_age))
+  select(-c(TMP, CardNum))
 
-rm(res, facvar, cond_levels)
+rm(cond_levels)
 
 # save everything to working directory
 save.image("albemarle_homes_2022.Rdata") 
