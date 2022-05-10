@@ -120,6 +120,10 @@ homes <- homes %>%
 
 table(homes$Condition)
 
+# Set CensusTract as character
+homes <- homes %>% 
+  mutate(CensusTract = as.character(CensusTract))
+
 # yearremodeled -> remodel indicator
 summary(homes$YearRemodeled) # NA not remodeled; not sure about 8
 homes <- homes %>% 
