@@ -281,14 +281,16 @@ xtabs(~ Condition + Remodeled, data = homes) %>%
 
 # Code along 4 ------------------------------------------------------------
 
-# Of all homes on over 10 acres of land (LotSize), what proportion are in each HSDistrict?
+# (1) Of all homes on over 10 acres of land (LotSize), what proportion are in
+# each HSDistrict?
 
 homes %>% 
   filter(LotSize > 10) %>% 
   count(HSDistrict) %>% 
   mutate(p = n/sum(n))
 
-# What is the proportion of homes over 10 acres of land (LotSize) within each school district?
+# (2) What is the proportion of homes over 10 acres of land (LotSize) within
+# each school district?
 
 homes %>% 
   group_by(HSDistrict) %>% 
@@ -296,6 +298,12 @@ homes %>%
             over10 = sum(LotSize > 10),
             p = over10/n)
 
+# Base R solution
+xtabs(~ HSDistrict + (LotSize > 10), data = homes)
+xtabs(~ HSDistrict + (LotSize > 10), data = homes) %>% 
+  proportions(margin = 2)
+xtabs(~ HSDistrict + (LotSize > 10), data = homes) %>% 
+  proportions(margin = 1)
 
 
 # Recoding variables ------------------------------------------------------
@@ -365,7 +373,7 @@ table(homes$Century)
 
 
 
-# Code Along 6 ------------------------------------------------------------
+# Code Along 5 ------------------------------------------------------------
 
 # Create a new variable called PriceCategory with the following levels based on
 # TotalValue:
@@ -416,7 +424,58 @@ barplot(table(homes$SaleMonth))
 
 # Merging/Joining data ----------------------------------------------------
 
+# Let's create some fake data to demonstrate merging/joining data:
+left <- data.frame(id=1:3,
+                   x=c(12, 14, 16))
+right <- data.frame(id=2:4,
+                    y=c("a", "b", "c"))
+left; right
 
+#### left join
+
+# If we want to retain everything in the left data frame and merge only what 
+# has a matching id in the right data frame, we do a LEFT JOIN.
+left; right
+left_join(left, right, by = "id")
+
+# Notice all rows from left are retained and NA is created in the y column where
+# the right had no matching id. This is why it's called a "left join".
+
+#### right join
+
+# If we want to retain everything in the right data frame and merge only what 
+# has a matching id in the left data frame, we do a RIGHT JOIN.
+left; right
+right_join(left, right, by = "id")
+
+# Notice all rows from right are retained and NA is created in the x column
+# where the left had no matching id. This is why it's called a "right join".
+
+#### inner join
+
+# If we want to retain only those rows with matching ids in BOTH data sets, we
+# do an INNER JOIN.
+left; right
+inner_join(left, right, by = "id")
+
+# Notice only those records with matching ids are joined.
+
+#### full join
+
+# If we wanted to merge ALL rows regardless of match, we do a FULL JOIN.
+left; right
+full_join(left, right, by = "id")
+
+# Notice all rows from both data frames are retained and NAs are created in 
+# columns where rows did not have matching ids in the other data set. 
+
+
+# Code along 6 ------------------------------------------------------------
+
+# The following code downloads data on median household income by census tract.
+# It was obtained from the 2020 American Community Survey.
+
+mhi <- read.csv("https://github.com/uvastatlab/DJA/raw/main/data/median_household_income.csv")
 
 
 # Helper functions --------------------------------------------------------

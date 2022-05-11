@@ -10,4 +10,5 @@ mhi <- get_acs(geography = "tract", variables = "B19013_001",
                state = "VA", county = "Albemarle", year = 2020)
 mhi <- mhi %>% 
   mutate(CensusTract = str_extract(NAME, pattern = "[0-9]{3}\\.?[0-9]{0,2}"))
+mhi$NAME <- NULL
 write.csv(mhi, file = "data/median_household_income.csv", row.names = FALSE)
