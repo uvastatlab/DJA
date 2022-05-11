@@ -715,7 +715,7 @@ pivot_wider(long,
 # rights.” They recently released its latest estimates of annual pregnancies,
 # births, and abortions among women in the US. (https://osf.io/kthnf/)
 
-pba <- readRDS('data/NationalAndStatePregnancy_PublicUse.rds')
+pba <- readRDS('https://github.com/uvastatlab/DJA/raw/main/data/NationalAndStatePregnancy_PublicUse.rds')
 
 # This is a wide data set with 103 columns. 
 ncol(pba)
