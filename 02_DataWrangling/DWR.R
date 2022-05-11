@@ -738,3 +738,16 @@ unique(pbaL$age_group)
 # 1517 means "15-17", etc
 # lt15 means "less than 15"
 
+# Why do this? Makes it easier for visualizing trends over time.
+
+# Example: compare birth rate trends in groups "1517", "1819", and "2024" in all
+# 50 states.
+
+ggplot(
+  filter(pbaL, 
+         age_group %in% c("1517", "1819", "2024"))) + 
+  aes(x = year, y = rate, color = age_group) +
+  geom_line() +
+  facet_wrap(~state)
+
+# Birth rates among these age groups are falling in all 50 states.
