@@ -475,8 +475,8 @@ full_join(left, right, by = "id")
 # The following code downloads data on median household income by census tract.
 # It was obtained from the 2020 American Community Survey.
 
-mhi <- read.csv("https://github.com/uvastatlab/DJA/raw/main/data/median_household_income.csv")
-
+mhi <- read.csv("https://github.com/uvastatlab/DJA/raw/main/data/median_household_income.rds")
+head(mhi)
 
 # Helper functions --------------------------------------------------------
 
