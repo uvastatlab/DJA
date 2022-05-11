@@ -473,10 +473,24 @@ full_join(left, right, by = "id")
 # Code along 6 ------------------------------------------------------------
 
 # The following code downloads data on median household income by census tract.
-# It was obtained from the 2020 American Community Survey.
+# It was obtained from the 2019 American Community Survey.
 
-mhi <- read.csv("https://github.com/uvastatlab/DJA/raw/main/data/median_household_income.rds")
-head(mhi)
+mhi <- readRDS(url("https://github.com/uvastatlab/DJA/raw/main/data/median_household_income.rds"))
+mhi
+
+# The following code calculates median home values by census tract.
+med_home <- homes %>% 
+  group_by(CensusTract) %>% 
+  summarize(med_value = median(TotalValue))
+med_home
+
+# Let's merge the median home income data with the median home value data using
+# a left join with med_home on the left.
+
+d <- left_join(med_home, mhi, by = "CensusTract")
+d
+
+plot(estimate ~ med_value, data = d)
 
 # Helper functions --------------------------------------------------------
 
