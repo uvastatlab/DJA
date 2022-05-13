@@ -535,16 +535,16 @@ I already downloaded the census tract borders and saved as an rds file for us to
 # 
 # # this is going to download about 15 MB of data; may take a second
 # alb <- tracts(state = "VA", county = "Albemarle", year = 2019)
+
+# format the internal latitude and longitude values as numeric. These represent
+# the geographic center of each census tract.
+
 # alb <- alb %>% 
 #   mutate(INTPTLON = as.numeric(INTPTLON),
 #          INTPTLAT = as.numeric(INTPTLAT))
 # saveRDS(alb, file = "../data/alb.Rds")
 
 alb <- readRDS(url("https://github.com/uvastatlab/DJA/raw/main/data/alb.Rds"))
-
-# format the internal latitude and longitude values as numeric. These represent
-# the geographic center of each census tract.
-
 
 ggplot(alb) +
   geom_sf() +
@@ -556,23 +556,21 @@ That's nice but it would help if the census tracts were labeled. We can do that 
 
 ```{r}
 ggplot(alb) +
-  aes(x = INTPTLON, y = INTPTLAT, label = NAME) +
   geom_sf() +
-  geom_sf_text(size = 3) + # size = 3 makes text smaller
-  theme_void() 
+  geom_text(aes(x = INTPTLON, y = INTPTLAT, label = NAME),
+            size = 3) + # size = 3 makes the labels smaller
+  theme_void()
 ```
 
 Now we can see most of the labels, but there's still some overplotting. It would be nice if we could zoom in on the map. Let's make the map interactive using the `ggplotly` function. Click and drag within the map to zoom in on a region.
 
 ```{r}
-ggplot(alb) +
-  aes(x = INTPTLON, y = INTPTLAT, label = NAME) +
+ggplot(alb) + 
   geom_sf() +
-  geom_sf_text(size = 3) + 
-  theme_void() 
-ggplotly()
+  geom_text(aes(x = INTPTLON, y = INTPTLAT, label = NAME),
+            size = 3) +
+  theme_void()
 ```
-
 
 We can shade the census tract regions according to a summary statistic such as median total value of a home. Let's do that! First we calculate median TotalValue by census tract, and then join with the alb data frame.
 
@@ -592,11 +590,12 @@ To shade the census tract regions we set the fill aesthetic to TotalValue. Hover
 ggplot(alb) +
   aes(fill = TotalValue) +
   geom_sf() +
-  geom_text(aes(y = as.numeric(INTPTLAT), x = as.numeric(INTPTLON), label = NAME)) +
+  geom_text(aes(x = INTPTLON, y = INTPTLAT, label = NAME),
+            size = 3) +
   scale_fill_continuous("Median home value", 
                         labels = dollar) +
   theme_void()
-ggplotly(tooltip = c("fill", "label"))
+ggplotly(tooltip = c("label", "fill"))
 
 ```
 
@@ -613,6 +612,5 @@ Want more ggplot2? Google `getting started with ggplot2` or `ggplot2 tutorial`. 
 
 - Wickham, H. and Grolemund G. (2017), *R for Data Science*. O'Reilly. http://r4ds.had.co.nz/
 
-**ggplot2 cheat sheet**    
-https://github.com/rstudio/cheatsheets/raw/master/data-visualization-2.1.pdf
+
 
