@@ -444,7 +444,7 @@ The following code creates a data frame of mean FullBath by YearBuilt for 1950 t
 
 ```{r}
 homes_mean_fb <- homes %>% 
-  filter(YearBuilt >= 1950 & remodel == 0) %>% 
+  filter(YearBuilt >= 1950 & Remodeled == 0) %>% 
   group_by(YearBuilt) %>% 
   summarize(FullBath = mean(FullBath))
   
@@ -454,6 +454,13 @@ head(homes_mean_fb)
 Create a line plot showing how the mean number of FullBaths has changed over time (YearBuilt). Try using `ggplotly()`.
 
 Reminder: Insert a new code chunk by pressing *Ctrl+Alt+I* (Win/Linux) or *Cmd+Option+I* (Mac). 
+
+```{r}
+ggplot(homes_mean_fb) +
+  aes(x = YearBuilt, y = FullBath) +
+  geom_line()
+ggplotly()
+```
 
 
 ## A package that extends ggplot2: ggridges
@@ -488,7 +495,7 @@ The ggridges package provides a custom theme specifically for use with ridgeline
 
 ```{r}
 ggplot(homes) +
-  aes(x = TotalValue, y = factor(CensusTract)) + 
+  aes(x = TotalValue, y = CensusTract) + 
   geom_density_ridges() +
   coord_cartesian(xlim = c(0, 1e6)) +
   theme_ridges()
@@ -516,7 +523,7 @@ NOTE: `ggplotly` does not work with plots made by ggridges.
 
 When we talk about real estate and census tracts, it's natural to want to see visualizations that incorporate maps. Where is census tract 110 in Albemarle county? How big is it geographically?
 
-To create maps we usually need latitude and longitude values so we an draw shapes, like the borders of counties, states and census tracts. Our data doesn't have that information so we need to get it. Fortunately there is an R package that helps us quickly get this data. The tigris package allows us to download TIGER/Line shapefiles from the United States Census Bureau and load into R as "sf" objects. SF stands for "simple features" which is standardized way of encoding spatial vector data in computers.
+To create maps we usually need latitude and longitude values so we can draw shapes, like the borders of counties, states and census tracts. Our data doesn't have that information so we need to get it. Fortunately there is an R package that helps us quickly get this data. The tigris package allows us to download TIGER/Line shapefiles from the United States Census Bureau and load into R as "sf" objects. SF stands for "simple features" which is a standardized way of encoding spatial vector data in computers.
 
 The ggplot2 package has geoms for "sf" objects to help us easily render a map. Let's draw a map of Albemarle county with census tract borders. First we use the tigris package to download the shapefile data using the `tracts` function. We save the data as an object called "alb" and draw a map using `geom_sf`. The `theme_void` function removes the grid points and background.
 
@@ -527,10 +534,17 @@ I already downloaded the census tract borders and saved as an rds file for us to
 # library(tigris)
 # 
 # # this is going to download about 15 MB of data; may take a second
-# alb <- tracts(state = "VA", county = "Albemarle")
-# saveRDS(alb, file = "alb.Rds")
+# alb <- tracts(state = "VA", county = "Albemarle", year = 2019)
+# alb <- alb %>% 
+#   mutate(INTPTLON = as.numeric(INTPTLON),
+#          INTPTLAT = as.numeric(INTPTLAT))
+# saveRDS(alb, file = "../data/alb.Rds")
 
-alb <- readRDS(url("https://github.com/uvastatlab/phdplus2021/raw/main/data/alb.Rds"))
+alb <- readRDS(url("https://github.com/uvastatlab/DJA/raw/main/data/alb.Rds"))
+
+# format the internal latitude and longitude values as numeric. These represent
+# the geographic center of each census tract.
+
 
 ggplot(alb) +
   geom_sf() +
@@ -538,11 +552,11 @@ ggplot(alb) +
 ```
 
 
-That's nice but it would help if the census tracts were labeled. We can do that with `geom_sf_text`. We need to map the NAME column of the alb data frame to the label aesthetic.
+That's nice but it would help if the census tracts were labeled. We can do that with `geom_text()`. We need to map the NAME column of the alb data frame to the label aesthetic. Set `x = INTPTLON` and `y = INTPTLAT` to place labels at the geographic center of the census tracts.
 
 ```{r}
 ggplot(alb) +
-  aes(label = NAME) +
+  aes(x = INTPTLON, y = INTPTLAT, label = NAME) +
   geom_sf() +
   geom_sf_text(size = 3) + # size = 3 makes text smaller
   theme_void() 
@@ -552,10 +566,10 @@ Now we can see most of the labels, but there's still some overplotting. It would
 
 ```{r}
 ggplot(alb) +
-  aes(label = NAME) +
+  aes(x = INTPTLON, y = INTPTLAT, label = NAME) +
   geom_sf() +
-  geom_sf_text(size = 3) +
-  theme_void()
+  geom_sf_text(size = 3) + 
+  theme_void() 
 ggplotly()
 ```
 
@@ -576,13 +590,13 @@ To shade the census tract regions we set the fill aesthetic to TotalValue. Hover
 
 ```{r}
 ggplot(alb) +
-  aes(fill = TotalValue, label = NAME) +
+  aes(fill = TotalValue) +
   geom_sf() +
-  geom_sf_text(size = 3) +
+  geom_text(aes(y = as.numeric(INTPTLAT), x = as.numeric(INTPTLON), label = NAME)) +
   scale_fill_continuous("Median home value", 
                         labels = dollar) +
   theme_void()
-ggplotly()
+ggplotly(tooltip = c("fill", "label"))
 
 ```
 
