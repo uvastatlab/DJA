@@ -169,7 +169,7 @@ We didn't have to "loop" through the values of the vector. Since `nchar` is vect
 - Any output is printed in the R console.
 - RStudio allows you to have multiple R scripts open.
 - Text prefaced with `#` are treated as _comments_. These are notes about the R code that are not evaluated.
-- In this workshop we'll work through and review a R script I have already written: `Intro_R_2021.R`
+- In this workshop we'll work through and review a R script I have already written: `IntroR.R`
 
 
 ## R packages
@@ -212,13 +212,10 @@ d <- read_excel('data.xlsx')
 2. Clean or "wrangle" the data if needed
 3. Analyze and visualize data
 
-We'll walk through an example analysis in R and talk about these steps.
-
 Steps 1 and 2 require various levels of R expertise.
 
 Step 3 requires not just R expertise, but also statistical and subject matter knowledge.
 
-Let's open the R script `Intro_R_2021.R`
 
 ## Keep learning R
 

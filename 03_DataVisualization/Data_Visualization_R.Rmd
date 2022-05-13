@@ -1,0 +1,604 @@
+---
+title: "Data Visualization in R with ggplot2"
+author: "Clay Ford, Statistical Research Consultant, UVA Library"
+output: html_notebook
+editor_options: 
+  chunk_output_type: inline
+---
+
+
+## Quick Intro to R Notebooks and R Markdown
+
+This is an R Markdown Notebook. It combines markdown, a plain text formatting syntax, and R code. When you execute R code within the notebook, the output appears beneath the code.
+
+This file was created in RStudio by going to File...New File...R Notebook.
+
+R code needs to be in "chunks" for it to work. Below is an example of an R code chunk. It makes a parabola using base R graphics (not ggplot2).
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter* (Win/Linux) or *Cmd+Shift+Return* (Mac).
+
+```{r}
+x <- seq(-1, 1, by = 0.01)
+y <- x^2
+plot(x, y, type = "l")
+```
+
+To hide the output, click the Expand/Collapse output button. To clear results (or an error), click the "x".
+
+You can also press *Ctrl+Enter* (Win/Linux) or *Cmd+Return* (Mac) to run one line of code at a time (instead of the entire chunk).
+
+Add a new R code chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I* (Win/Linux) or *Cmd+Option+I* (Mac).
+
+## Exercise 0 (code along)
+
+Insert a new R code chunk below and type and run the code: 22/7
+
+
+## Import data
+
+Let's import our Albemarle County real estate data. We use the `readRDS()` function. Recall that an `rds` file is simply any R object that's been saved. In this case we saved a data frame. Below we read in the rds file via URL. To do this we need to use the base R `url()` function to open a connection to the website where the file is stored.
+
+```{r}
+URL <- "https://github.com/uvastatlab/DJA/raw/main/data/albemarle_homes_2022.rds"
+homes <- readRDS(url(URL))
+
+```
+
+Let's look at the first few rows:
+
+```{r}
+head(homes)
+```
+
+Variable name definitions:
+
+-   *YearBuilt*: year house was built
+-   *YearRemodeled*: year house was remodeled
+-   *UseCode*: The use of the house
+-   *Condition*: assessed condition of home
+-   *FinSqFt*: finished square feet
+-   *Cooling*: Central Air indicator
+-   *FP_Open*: number of fireplaces
+-   *Bedroom*: number of bedrooms
+-   *FullBath*: number of full bathrooms (toilet, sink and bath)
+-   *HalfBath*: number of half bathrooms (toilet and sink only)
+-   *TotalRooms*: total rooms in house
+-   *LotSize*: size of land on which home is located, in acres
+-   *LandValue*: assessed value of the land
+-   *ImprovementsValue*: assessed value of "improvements" to lot
+-   *TotalValue*: total assessed value of home and property
+-   *LastSalePrice*: price of home when last sold
+-   *LastSaleDate*: date home was last sold
+-   *ESdistrict*: the elementary school the home feeds into
+-   *MSdistrict*: the middle school the home feeds into
+-   *HSDistrict*: the high school the home feeds into
+-   *CensusTract*: the census tract the home is located in
+-   *Age*: of the house in years as of 2022
+-   *Remodeled*: indicator if house has been remodeled (0=no, 1=yes)
+-   *FP*: indicator if house has fireplace (0=no, 1=yes)
+
+## Intro to ggplot2
+
+The ggplot2 package implements *The Grammar of Graphics* as defined in the book of the same name by Leland Wilkinson.
+
+It requires your data be in a data frame or tibble.
+
+Let's do a quick example. How does the total value of a home relate to its size in finished square feet? Plot TotalValue versus FinSqFt to create a scatter plot.
+
+First we need to load the ggplot2 package, which we can do with `library(tidyverse)`. Only do this once per R session.
+
+```{r}
+library(ggplot2) 
+library(dplyr)
+ggplot(homes) +
+  aes(x = FinSqFt, y = TotalValue) +
+  geom_point() 
+```
+
+What just happened?
+
+-   The `ggplot` function creates a plotting area for a data frame
+-   The `aes` function maps variables in the data frame to aesthetic properties of geometric shapes
+-   The `geom_point` function specifies we want to use points
+-   combine these functions with `+`, which adds components to a plot
+
+Don't forget the parentheses on `geom_point()`!
+
+*Most of what we do with ggplot2 takes this general form*
+
+```
+ggplot(data) +
+  aes() +
+  geom_something()
+  
+```
+
+Or this form, with the aesthetics defined in the `ggplot()` function:
+
+```
+ggplot(data, aes()) +
+  geom_something()
+
+```
+      
+It can get much more complicated, but for exploratory visualization this often sufficient.
+
+## Code along 1
+
+Do younger (more recently built) houses have a tendency to be bigger than older houses? Create a scatterplot of FinSqFt (y-axis) versus Age (x-axis). 
+
+- Try entering `alpha = 1/10` in `geom_point()`. What does it do?
+- Try entering `shape = "."` in `geom_point()`. What does it do?
+- Try entering `shape = 1` in `geom_point()`. What does it do? (see `?points` shapes and their numeric codes)
+
+Reminder: Insert a new code chunk by pressing *Ctrl+Alt+I* (Win/Linux) or *Cmd+Option+I* (Mac). 
+
+```{r}
+ggplot(homes) +
+  aes(x = Age, y = FinSqFt) +
+  geom_point(alpha = 1/10)
+```
+
+
+
+## More aesthetics and geoms, and introducing facets
+
+Points not only have positions in a plane, but can be different sizes and have different shapes and colors. We can map variables in our data frame to these aesthetics.
+
+How does the relationship between TotalValue and FinSqFt differ between homes with and without central air?
+
+Plot TotalValue versus FinSqFt to create a scatter plot, but also color the points according to whether or not the homes have central air (Cooling).
+
+```{r}
+ggplot(homes) +
+  aes(x = FinSqFt, y = TotalValue, color = Cooling) +
+  geom_point() 
+```
+
+We can also map the size of the points to a variable, such as LotSize. Notice I have also mapped the shape of the point to Cooling.
+
+```{r}
+ggplot(homes) +
+  aes(x = FinSqFt, y = TotalValue, 
+      shape = Cooling, size = LotSize) +
+  geom_point() 
+
+```
+
+Notice the overplotting. Perhaps we prefer to see separate scatterplots for each Cooling category. We can achieve that with *facets*. The function to use is `facet_wrap()` with the variable that we want to facet on. In this case it's Cooling. Notice we precede the variable with a tilde `~`. We can read that as "facet by Cooling".
+
+```{r}
+ggplot(homes) +
+  aes(x = FinSqFt, y = TotalValue, size = LotSize) +
+  geom_point(alpha = 1/2) +
+  facet_wrap(~ Cooling)
+
+```
+
+
+We can also have multiple geoms in a plot. Let's say we want to add a smooth trend line that summarizes the relationship between FinSqFt and TotalValue:
+
+```{r}
+ggplot(homes) +
+  aes(x = FinSqFt, y = TotalValue) +
+  geom_point(alpha = 1/2) +
+  geom_smooth() +
+  facet_wrap(~ Cooling) 
+
+```
+
+## Code along 2
+
+How is TotalValue related to LotSize within each high school district?
+
+Create a scatterplot of TotalValue (y-axis) vs LotSize (x-axis), faceted by HSDistrict. Add smooth trend lines to summarize the relationship.
+
+Reminder: Insert a new code chunk by pressing *Ctrl+Alt+I* (Win/Linux) or *Cmd+Option+I* (Mac). 
+
+```{r}
+ggplot(homes) +
+  aes(x = LotSize, y = TotalValue) +
+  geom_point() +
+  geom_smooth() +
+  facet_wrap(~HSDistrict)
+```
+
+
+
+
+## Binning and zooming
+
+Dealing with large amounts to data leads to overplotting. So far we've used alpha values to modify transparency from 0 (invisible) to 1 (solid), facets, and different geometric shapes to help alleviate this. Another is "binning". As long as you have the `hexbin` package installed, this can be easily accomplished with `geom_hex`. This "bins" counts of points into hexagons and colors the hexagons according to counts. Lighter colors mean higher counts. Changing the number of bins (default 30 x 30) decreases/increases the number of hexagons.
+
+```{r}
+# install.packages("hexbin")
+ggplot(homes) +
+  aes(x = FinSqFt, y = TotalValue) +
+  geom_hex() 
+
+```
+
+
+Albemarle county has homes with very large TotalValue and LotSize values. Including them in our plots means we "zoom out" to accommodate them which means we're "far away" from the majority of homes.
+
+To zoom in on data with ggplot2, we use the `coord_cartesion()` function and define the limits to view with the `xlim` and/or `ylim` arguments. 
+
+```{r}
+ggplot(homes) +
+  aes(x = FinSqFt, y = TotalValue) +
+  geom_point() +
+  geom_smooth() + 
+  coord_cartesian(xlim = c(0,5000), # from 0 to 5,000
+                  ylim = c(0, 2e6)) # from 0 to $2,000,000
+
+```
+
+If presenting this plot to an audience, tell them it's zoomed in and looking at a subset of your data.
+
+The numbers are a little hard to read on the y-axis. We can format them as dollar amounts using the labels argument in the `scale_y_continuous()` function. To do this we need to load the scales package, which is installed when you install the ggplot2 package.
+
+```{r}
+library(scales) # for the dollar function
+ggplot(homes) +
+  aes(x = FinSqFt, y = TotalValue) +
+  geom_point() +
+  geom_smooth() +
+  coord_cartesian(xlim = c(0, 5000),
+                  ylim = c(0, 2e6)) + 
+  scale_y_continuous(labels = dollar) 
+
+```
+
+## Code along 3
+
+Modify your code from code along 2 to zoom in on the y-axis to see home prices ranging from 0 to `$1,000,000`, and zoom in on the x-axis to view homes on lots ranging in size from 0 to 5 acres. Also use the dollar function to format the home prices on the y-axis.
+
+```{r}
+ggplot(homes) +
+  aes(x = LotSize, y = TotalValue) +
+  geom_point() +
+  geom_smooth() +
+  facet_wrap(~ HSDistrict) +
+  coord_cartesian(xlim = c(0, 5),
+                  ylim = c(0, 1e6)) +
+  scale_y_continuous(labels = dollar)
+
+```
+
+## Visualizing counts
+
+Recall the condition variable. We can quickly get counts of each condition using the table function:
+
+```{r}
+homes %>% count(Condition)
+```
+
+One way to visualize counts is with a bar plot. We can create a bar plot in ggplot2 with `geom_bar()`. Notice it automatically generates the counts for us.
+
+```{r}
+ggplot(homes) +
+  aes(x = Condition) +
+  geom_bar()
+```
+
+One of the aesthetics of bars is their "fill" color. We can map a variable from our data frame to the fill aesthetic. For example, let's see counts of conditions for homes with and without central air (Cooling).
+
+```{r}
+ggplot(homes) +
+  aes(x = Condition, fill = Cooling) +
+  geom_bar()
+
+```
+
+The default result is to stack the bars. We can set them side-by-side setting the position argument to "dodge".
+
+```{r}
+ggplot(homes) +
+  aes(x = Condition, fill = Cooling) +
+  geom_bar(position = "dodge") 
+
+```
+
+The large number of Average homes makes it difficult to see the counts for the other categories. We could use `coord_cartesian()` to zoom in on the y-axis. An alternative approach is to view the proportion of homes with and without central air within each condition. We can do this by setting the position argument to "fill".
+
+```{r}
+ggplot(homes) +
+  aes(x = Condition, fill = Cooling) +
+  geom_bar(position = "fill")
+
+```
+
+The y-axis indicates proportions instead of counts.
+
+## Code along 4
+
+Given a home's condition, is it more likely to be in a particular high school district? For example, given all the homes in Excellent condition, is there a higher proportion of them in one of the high school districts?
+
+Create a bar plot of Condition (Condition on x-axis), filled by HSDistrict. Set position = 'fill' so we visualize within each Condition the proportion belonging to a high school district.
+
+Reminder: Insert a new code chunk by pressing *Ctrl+Alt+I* (Win/Linux) or *Cmd+Option+I* (Mac). 
+
+```{r}
+ggplot(homes) +
+  aes(x = Condition, fill = HSDistrict) +
+  geom_bar(position = "fill")
+```
+
+
+## Numeric values vs groups
+
+How does the TotalValue of homes differ between elementary school districts? One way to visualize this is with a boxplot. We can do this with `geom_boxplot`.
+
+```{r}
+ggplot(homes) +
+  aes(x = ESDistrict, y = TotalValue) +
+  geom_boxplot()
+```
+
+The x-axis is hard to read. This happens sometimes. One solution is to simply rotate the plot. We can do that with the `coord_flip()` function. The `coord_flip()` function also allows us to zoom in on a plot with the xlim and ylim arguments. Let's zoom in on the y-axis and look at homes less than 2 million in TotalValue.
+
+```{r}
+ggplot(homes) +
+  aes(x = ESDistrict, y = TotalValue) +
+  geom_boxplot() +
+  coord_flip(ylim = c(0,2e6))
+
+```
+
+Quick review of boxplots:
+
+-   The width of the box (along the y axis) represents the 
+    middle 50% of the data. It is called the Interquartile Range (IQR).
+-   The line in the box is the median.
+-   The top of the box is the 75th percentile.
+-   The bottom of the box is the 25th percentile.
+-   The "whiskers" extending out of the box are to the highest and 
+    lowest values not to exceed 1.5 x IQR
+-   The dots are considered "outliers" relative to the rest of the data.
+
+A similar plot is the violin plot, which allows us to compare the distributions between categories using smooth density plots. Use `geom_violin()`
+
+```{r}
+ggplot(homes) +
+  aes(x = ESDistrict, y = TotalValue) +
+  geom_violin() +
+  coord_flip(ylim = c(0,2e6))
+```
+
+Boxplots and violin plots obscure the total number within in each group. That's not necessarily a bad thing. Too much information in a plot can be overwhelming. However we could create a 1-dimensional scatterplot, sometimes called a "stripchart". The `geom_jitter()` function is like `geom_point()` except it lets you add some random noise to "jitter" the points.
+
+```{r}
+ggplot(homes) +
+  aes(x = ESDistrict, y = TotalValue) +
+  geom_jitter(width = 0.2, height = 0, alpha = 1/6) +
+  coord_flip(ylim = c(0,2e6))
+
+```
+
+## Code along 5
+
+How are the ages of homes distributed between the elementary school districts? Are there some elementary schools that serve mostly newer homes? Create a boxplot of Age of home by ESDistrict.
+
+Reminder: Insert a new code chunk by pressing *Ctrl+Alt+I* (Win/Linux) or *Cmd+Option+I* (Mac). 
+
+```{r}
+ggplot(homes) +
+  aes(x = ESDistrict, y = Age) +
+  geom_boxplot() +
+  coord_flip()
+```
+
+
+
+
+## Line plots over time
+
+How many homes have been built each year in Albemarle county? What year saw the most homes built? We can use the YearBuilt variable in our data to help answer this. We just need to count up the number of homes per YearBuilt and save the result as a data frame. We'll use what we learned in the last session to do this. 
+
+```{r}
+homes_year <- homes %>%  
+  count(YearBuilt) 
+tail(homes_year, n = 10)
+```
+
+Let's plot n vs YearBuilt using a line.
+
+```{r}
+ggplot(homes_year) +
+  aes(x = YearBuilt, y = n) +
+  geom_line()
+```
+
+There was a boom sometime after 1750. Which year was it? Around 1950 it seems the number of homes built per year really started to take off. When was the peak? It also looks like we saw a dip sometime after 2000. What year was that?
+
+The above plot shows some interesting trends and events, but it's hard to get precise years and numbers. Fortunately there are ways to make ggplot graphs interactive. Here's one way using the plotly package. plotly is package that allows you to make interactive web graphics. Simply call `ggplotly()` immediately after your ggplot code:
+
+```{r}
+# install.packages("plotly")
+library(plotly)
+ggplot(homes_year) +
+  aes(x = YearBuilt, y = n) +
+  geom_line()
+ggplotly()
+```
+
+Now we can interact with the plot to see information of interest. Hovering over points reveals precise information. We can also zoom in on portions of the plot. (Double-click in the plotting region to return to the full plot.)
+
+We can also save our plot and call `ggplotly()` on it.
+
+```{r}
+p <- ggplot(homes_year) +
+  aes(x = YearBuilt, y = n) +
+  geom_line()
+ggplotly(p)
+
+```
+
+
+
+## Code along 6
+
+How has the mean number of FullBaths in a home changed over time (YearBuilt), since 1950? 
+
+The following code creates a data frame of mean FullBath by YearBuilt for 1950 to present, but only homes that have not been remodeled.
+
+```{r}
+homes_mean_fb <- homes %>% 
+  filter(YearBuilt >= 1950 & remodel == 0) %>% 
+  group_by(YearBuilt) %>% 
+  summarize(FullBath = mean(FullBath))
+  
+head(homes_mean_fb)
+```
+
+Create a line plot showing how the mean number of FullBaths has changed over time (YearBuilt). Try using `ggplotly()`.
+
+Reminder: Insert a new code chunk by pressing *Ctrl+Alt+I* (Win/Linux) or *Cmd+Option+I* (Mac). 
+
+
+## A package that extends ggplot2: ggridges
+
+There are many packages that extend ggplot, mainly by adding additional geoms or themes. One that is useful for our data is the ggridges package.
+
+First notice the challenge of making comparisons of density histograms between 20 census tracts. (Census tracts are small subdivisions of a county that are used by the USA Census Bureau for statistical reporting.)
+
+```{r}
+ggplot(homes) +
+  aes(x = TotalValue) +
+  geom_density() +
+  facet_wrap(~CensusTract) +
+  coord_cartesian(xlim = c(0, 1e6))
+
+```
+
+The ggridges package allows us to create ridgeline plots, which are density plots arranged in a staggered fashion. Notice the new geom `geom_density_ridges()`.
+
+```{r}
+# install.packages("ggridges")
+library(ggridges)
+ggplot(homes) +
+  aes(x = TotalValue, y = CensusTract) + 
+  geom_density_ridges() +
+  coord_cartesian(xlim = c(0, 1e6))
+
+```
+
+
+The ggridges package provides a custom theme specifically for use with ridgeline plots. Just tack on the function `theme_ridges()` to use it.
+
+```{r}
+ggplot(homes) +
+  aes(x = TotalValue, y = factor(CensusTract)) + 
+  geom_density_ridges() +
+  coord_cartesian(xlim = c(0, 1e6)) +
+  theme_ridges()
+
+```
+
+
+We can reorder the levels of CensusTract by a summary statistic such as the median of TotalValue. Notice we use the base R function `reorder` to accomplish this. That will produce a ridgeline plot where the distributions are ordered by median TotalValue of each census tract. Below we use the `labs` function to add a title and update the axis labels.
+
+```{r}
+ggplot(homes) +
+  aes(x = TotalValue, y = reorder(CensusTract, TotalValue, median)) + 
+  geom_density_ridges() +
+  coord_cartesian(xlim = c(0, 1e6)) +
+  scale_x_continuous(labels = scales::dollar) +
+  labs(y = "Census Tract", x = "Total Value", 
+       title = "Distribution of Total Value by Census Tract") +
+  theme_ridges()
+
+```
+
+NOTE: `ggplotly` does not work with plots made by ggridges.
+
+## Creating maps in ggplot2
+
+When we talk about real estate and census tracts, it's natural to want to see visualizations that incorporate maps. Where is census tract 110 in Albemarle county? How big is it geographically?
+
+To create maps we usually need latitude and longitude values so we an draw shapes, like the borders of counties, states and census tracts. Our data doesn't have that information so we need to get it. Fortunately there is an R package that helps us quickly get this data. The tigris package allows us to download TIGER/Line shapefiles from the United States Census Bureau and load into R as "sf" objects. SF stands for "simple features" which is standardized way of encoding spatial vector data in computers.
+
+The ggplot2 package has geoms for "sf" objects to help us easily render a map. Let's draw a map of Albemarle county with census tract borders. First we use the tigris package to download the shapefile data using the `tracts` function. We save the data as an object called "alb" and draw a map using `geom_sf`. The `theme_void` function removes the grid points and background.
+
+I already downloaded the census tract borders and saved as an rds file for us to use to help save time.
+
+```{r}
+# install.packages("tigris")
+# library(tigris)
+# 
+# # this is going to download about 15 MB of data; may take a second
+# alb <- tracts(state = "VA", county = "Albemarle")
+# saveRDS(alb, file = "alb.Rds")
+
+alb <- readRDS(url("https://github.com/uvastatlab/phdplus2021/raw/main/data/alb.Rds"))
+
+ggplot(alb) +
+  geom_sf() +
+  theme_void() 
+```
+
+
+That's nice but it would help if the census tracts were labeled. We can do that with `geom_sf_text`. We need to map the NAME column of the alb data frame to the label aesthetic.
+
+```{r}
+ggplot(alb) +
+  aes(label = NAME) +
+  geom_sf() +
+  geom_sf_text(size = 3) + # size = 3 makes text smaller
+  theme_void() 
+```
+
+Now we can see most of the labels, but there's still some overplotting. It would be nice if we could zoom in on the map. Let's make the map interactive using the `ggplotly` function. Click and drag within the map to zoom in on a region.
+
+```{r}
+ggplot(alb) +
+  aes(label = NAME) +
+  geom_sf() +
+  geom_sf_text(size = 3) +
+  theme_void()
+ggplotly()
+```
+
+
+We can shade the census tract regions according to a summary statistic such as median total value of a home. Let's do that! First we calculate median TotalValue by census tract, and then join with the alb data frame.
+
+
+```{r}
+med_tv <- homes %>%
+  group_by(CensusTract) %>% 
+  summarize(TotalValue = median(TotalValue))
+
+alb <- left_join(alb, med_tv, by = c("NAME" = "CensusTract"))
+
+```
+
+To shade the census tract regions we set the fill aesthetic to TotalValue. Hover over the census tract label to see the exact median home value.
+
+```{r}
+ggplot(alb) +
+  aes(fill = TotalValue, label = NAME) +
+  geom_sf() +
+  geom_sf_text(size = 3) +
+  scale_fill_continuous("Median home value", 
+                        labels = dollar) +
+  theme_void()
+ggplotly()
+
+```
+
+
+## We're done!
+
+If you would like to talk more about ggplot2 or anything else statistics related, I would love to hear from you: `jcf2d@virginia.edu` or `statlab@virginia.edu`
+
+Want more ggplot2? Google `getting started with ggplot2` or `ggplot2 tutorial`. Also see the numerous examples provided with just about every ggplot2 function.
+
+## References
+
+- Wickham, H. (2016), *ggplot2: Elegant Graphics for Data Analysis, 2nd ed*, Springer. https://ggplot2-book.org/ (on-line version of work-in-progress 3rd edition)
+
+- Wickham, H. and Grolemund G. (2017), *R for Data Science*. O'Reilly. http://r4ds.had.co.nz/
+
+**ggplot2 cheat sheet**    
+https://github.com/rstudio/cheatsheets/raw/master/data-visualization-2.1.pdf
+
