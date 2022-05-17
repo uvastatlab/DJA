@@ -518,22 +518,20 @@ ggplot(homes) +
 
 NOTE: `ggplotly` does not work with plots made by ggridges.
 
-## Creating maps in ggplot2
+## Creating interactive maps in R with leaflet
 
 When we talk about real estate and census tracts, it's natural to want to see visualizations that incorporate maps. Where is census tract 110 in Albemarle county? How big is it geographically?
 
 To create maps we usually need latitude and longitude values so we can draw shapes, like the borders of counties, states and census tracts. Our data doesn't have that information so we need to get it. Fortunately there is an R package that helps us quickly get this data. The tigris package allows us to download TIGER/Line shapefiles from the United States Census Bureau and load into R as "sf" objects. SF stands for "simple features" which is a standardized way of encoding spatial vector data in computers.
 
-The ggplot2 package has geoms for "sf" objects to help us easily render a map. Let's draw a map of Albemarle county with census tract borders. First we use the tigris package to download the shapefile data using the `tracts` function. We save the data as an object called "alb" and draw a map using `geom_sf`. The `theme_void` function removes the grid points and background.
-
-I already downloaded the census tract borders and saved as an rds file for us to use to help save time.
+I already downloaded the census tract borders and saved as an rds file for us to use to help save time. The code I used is below, commented out. The final uncommented line reads in the data.
 
 ```{r}
 # install.packages("tigris")
 # library(tigris)
 # 
 # this is going to download about 15 MB of data; may take a second
-alb <- tracts(state = "VA", county = "Albemarle", year = 2019)
+# alb <- tracts(state = "VA", county = "Albemarle", year = 2019)
 
 # format the internal latitude and longitude values as numeric. These represent
 # the geographic center of each census tract.
@@ -546,40 +544,31 @@ alb <- tracts(state = "VA", county = "Albemarle", year = 2019)
 
 alb <- readRDS(url("https://github.com/uvastatlab/DJA/raw/main/data/alb.Rds"))
 
-# ggplot(alb) +
-#   geom_sf() +
-#   theme_void() 
+```
 
+Now that we have spatial data, we're ready to create a map. For this we'll use the leaflet package. The leaflet package takes a spatial data frame and allows you to layer on "Tiles" and "Polygons" (among much else). Tiles are base maps. The default is OpenStreetMap. Polygons are shapes drawn with the latitude and longitude coordinates stored in the `geometry` column of the `alb` data frame. In this case it draws the census tract boundaries. The code below produces an interactive map you can zoom in and move around. 
+
+```{r}
 library(leaflet)
 leaflet(alb) %>% 
+  addTiles() %>% 
+  addPolygons() 
+```
+
+
+That's nice but it would help if the census tracts were labeled. We can do that with `addLabelOnlyMarkers()`. We need to map the NAME column of the `alb` data frame to the `label` argument. Set `lng = INTPTLON` and `lat = INTPTLAT` to place labels at the geographic center of the census tracts. The leaflet package requires we place a tilde (`~`) in front of variable names to indicate they're located in the data frame called in the `leaflet` function. Again the map that is rendered is interactive. 
+
+```{r}
+leaflet(alb) %>% 
+  addTiles() %>% 
   addPolygons() %>% 
   addLabelOnlyMarkers(lng = ~INTPTLON, lat = ~INTPTLAT, label = ~NAME,
-                      labelOptions = labelOptions(noHide = TRUE, 
-                                                  textOnly = TRUE))
+                      labelOptions = labelOptions(noHide = TRUE))
+
 ```
 
 
-That's nice but it would help if the census tracts were labeled. We can do that with `geom_text()`. We need to map the NAME column of the alb data frame to the label aesthetic. Set `x = INTPTLON` and `y = INTPTLAT` to place labels at the geographic center of the census tracts.
-
-```{r}
-ggplot(alb) +
-  geom_sf() +
-  geom_text(aes(x = INTPTLON, y = INTPTLAT, label = NAME),
-            size = 3) + # size = 3 makes the labels smaller
-  theme_void()
-```
-
-Now we can see most of the labels, but there's still some overplotting. It would be nice if we could zoom in on the map. Let's make the map interactive using the `ggplotly` function. Click and drag within the map to zoom in on a region.
-
-```{r}
-ggplot(alb) + 
-  geom_sf() +
-  geom_text(aes(x = INTPTLON, y = INTPTLAT, label = NAME),
-            size = 3) +
-  theme_void()
-```
-
-We can shade the census tract regions according to a summary statistic such as median total value of a home. Let's do that! First we calculate median TotalValue by census tract, and then join with the alb data frame.
+If we like we can shade the census tract regions according to a summary statistic such as median total value of a home. Let's do that! First we calculate median TotalValue by census tract, and then join with the `alb` data frame.
 
 
 ```{r}
@@ -591,18 +580,25 @@ alb <- left_join(alb, med_tv, by = c("NAME" = "CensusTract"))
 
 ```
 
-To shade the census tract regions we set the fill aesthetic to TotalValue. Hover over the census tract label to see the exact median home value.
+To shade the census tract regions we once again use `addPolygons()`. This time we assign the `label` argument to TotalValue to display the median home value when we hover over a census tract. We also add a legend using `addLegend()`. For both of these we use a color palette function that we create with the `colorNumeric()` function. That generates a color palette based on the numeric data we give it. 
 
 ```{r}
-ggplot(alb) +
-  aes(fill = TotalValue) +
-  geom_sf() +
-  geom_text(aes(x = INTPTLON, y = INTPTLAT, label = NAME),
-            size = 3) +
-  scale_fill_continuous("Median home value", 
-                        labels = dollar) +
-  theme_void()
-ggplotly(tooltip = c("label", "fill"))
+# create color palette for shading census tracts
+pal <-  colorNumeric("YlOrRd", alb$TotalValue)
+leaflet(alb) %>% 
+  addTiles() %>% 
+  addPolygons() %>% 
+  addLabelOnlyMarkers(lng = ~INTPTLON, lat = ~INTPTLAT, label = ~NAME,
+                      labelOptions = labelOptions(noHide = TRUE)) %>% 
+  addPolygons(stroke = FALSE, fillOpacity = 0.5, 
+              smoothFactor = 0.5, 
+              color = ~pal(TotalValue),
+              label = ~TotalValue) %>% 
+  addLegend(pal = pal, 
+            values = ~TotalValue, 
+            opacity = 0.9, 
+            title = "Median Home Value", 
+            position = "bottomleft")
 
 ```
 
@@ -619,5 +615,10 @@ Want more ggplot2? Google `getting started with ggplot2` or `ggplot2 tutorial`. 
 
 - Wickham, H. and Grolemund G. (2017), *R for Data Science*. O'Reilly. http://r4ds.had.co.nz/
 
-
+-   Cheng J, Karambelkar B, Xie Y (2022). _leaflet: Create Interactive Web Maps with the
+  JavaScript 'Leaflet' Library_. R package version 2.1.1,
+  <https://CRAN.R-project.org/package=leaflet>.
+  
+-   C. Sievert. Interactive Web-Based Data Visualization with R, plotly, and shiny.
+  Chapman and Hall/CRC Florida, 2020. <https://plotly-r.com/>
 
