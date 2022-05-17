@@ -54,7 +54,6 @@ Variable name definitions:
 
 -   *YearBuilt*: year house was built
 -   *YearRemodeled*: year house was remodeled
--   *UseCode*: The use of the house
 -   *Condition*: assessed condition of home
 -   *FinSqFt*: finished square feet
 -   *Cooling*: Central Air indicator
@@ -85,7 +84,7 @@ It requires your data be in a data frame or tibble.
 
 Let's do a quick example. How does the total value of a home relate to its size in finished square feet? Plot TotalValue versus FinSqFt to create a scatter plot.
 
-First we need to load the ggplot2 package, which we can do with `library(tidyverse)`. Only do this once per R session.
+First we need to load the ggplot2 package. Only do this once per R session. We also load the dplyr package because we'll use it later.
 
 ```{r}
 library(ggplot2) 
@@ -533,22 +532,30 @@ I already downloaded the census tract borders and saved as an rds file for us to
 # install.packages("tigris")
 # library(tigris)
 # 
-# # this is going to download about 15 MB of data; may take a second
-# alb <- tracts(state = "VA", county = "Albemarle", year = 2019)
+# this is going to download about 15 MB of data; may take a second
+alb <- tracts(state = "VA", county = "Albemarle", year = 2019)
 
 # format the internal latitude and longitude values as numeric. These represent
 # the geographic center of each census tract.
 
-# alb <- alb %>% 
+# alb <- alb %>%
 #   mutate(INTPTLON = as.numeric(INTPTLON),
-#          INTPTLAT = as.numeric(INTPTLAT))
+#          INTPTLAT = as.numeric(INTPTLAT)) %>% 
+#   sf::st_transform(crs = '+proj=longlat +datum=WGS84')
 # saveRDS(alb, file = "../data/alb.Rds")
 
 alb <- readRDS(url("https://github.com/uvastatlab/DJA/raw/main/data/alb.Rds"))
 
-ggplot(alb) +
-  geom_sf() +
-  theme_void() 
+# ggplot(alb) +
+#   geom_sf() +
+#   theme_void() 
+
+library(leaflet)
+leaflet(alb) %>% 
+  addPolygons() %>% 
+  addLabelOnlyMarkers(lng = ~INTPTLON, lat = ~INTPTLAT, label = ~NAME,
+                      labelOptions = labelOptions(noHide = TRUE, 
+                                                  textOnly = TRUE))
 ```
 
 
