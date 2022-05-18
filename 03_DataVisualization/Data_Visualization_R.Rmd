@@ -1,5 +1,5 @@
 ---
-title: "Data Visualization in R with ggplot2"
+title: "Data Visualization in R"
 author: "Clay Ford, Statistical Research Consultant, UVA Library"
 output: html_notebook
 editor_options: 
@@ -29,7 +29,7 @@ You can also press *Ctrl+Enter* (Win/Linux) or *Cmd+Return* (Mac) to run one lin
 
 Add a new R code chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I* (Win/Linux) or *Cmd+Option+I* (Mac).
 
-## Exercise 0 (code along)
+## Code along 0
 
 Insert a new R code chunk below and type and run the code: 22/7
 
@@ -80,7 +80,7 @@ Variable name definitions:
 
 The ggplot2 package implements *The Grammar of Graphics* as defined in the book of the same name by Leland Wilkinson.
 
-It requires your data be in a data frame or tibble.
+It requires your data be in a data frame (or tibble).
 
 Let's do a quick example. How does the total value of a home relate to its size in finished square feet? Plot TotalValue versus FinSqFt to create a scatter plot.
 
@@ -99,7 +99,7 @@ What just happened?
 -   The `ggplot` function creates a plotting area for a data frame
 -   The `aes` function maps variables in the data frame to aesthetic properties of geometric shapes
 -   The `geom_point` function specifies we want to use points
--   combine these functions with `+`, which adds components to a plot
+-   combine these functions with `+`, which adds components to a plot. The `+` is not a pipe! It is an operator.
 
 Don't forget the parentheses on `geom_point()`!
 
@@ -119,6 +119,8 @@ ggplot(data, aes()) +
   geom_something()
 
 ```
+
+There are many `geom_` functions in ggplot2. This naming convention makes them easier to find using RStudio's autocomplete functionality. 
       
 It can get much more complicated, but for exploratory visualization this often sufficient.
 
@@ -142,11 +144,11 @@ ggplot(homes) +
 
 ## More aesthetics and geoms, and introducing facets
 
-Points not only have positions in a plane, but can be different sizes and have different shapes and colors. We can map variables in our data frame to these aesthetics.
+Points not only have positions in a plane, but can be different sizes and have different shapes and colors. We can "map" variables in our data frame to these aesthetics. In other words, we let variables define properties of points such as size, shape, and color.
 
 How does the relationship between TotalValue and FinSqFt differ between homes with and without central air?
 
-Plot TotalValue versus FinSqFt to create a scatter plot, but also color the points according to whether or not the homes have central air (Cooling).
+Plot TotalValue versus FinSqFt to create a scatter plot, but also color the points according to whether or not the homes have central air (Cooling) using the `color` argument. 
 
 ```{r}
 ggplot(homes) +
@@ -154,7 +156,7 @@ ggplot(homes) +
   geom_point() 
 ```
 
-We can also map the size of the points to a variable, such as LotSize. Notice I have also mapped the shape of the point to Cooling.
+We can also map the size of the points to a variable, such as LotSize, using the `size` argument. Notice I have also mapped the shape of the point to Cooling using the `shape` argument.
 
 ```{r}
 ggplot(homes) +
@@ -175,7 +177,7 @@ ggplot(homes) +
 ```
 
 
-We can also have multiple geoms in a plot. Let's say we want to add a smooth trend line that summarizes the relationship between FinSqFt and TotalValue:
+We can also have multiple geoms in a plot. Let's say we want to add a smooth trend line that summarizes the relationship between FinSqFt and TotalValue. Add the `geom_smooth()`
 
 ```{r}
 ggplot(homes) +
@@ -204,16 +206,15 @@ ggplot(homes) +
 
 
 
-
 ## Binning and zooming
 
-Dealing with large amounts to data leads to overplotting. So far we've used alpha values to modify transparency from 0 (invisible) to 1 (solid), facets, and different geometric shapes to help alleviate this. Another is "binning". As long as you have the `hexbin` package installed, this can be easily accomplished with `geom_hex`. This "bins" counts of points into hexagons and colors the hexagons according to counts. Lighter colors mean higher counts. Changing the number of bins (default 30 x 30) decreases/increases the number of hexagons.
+Dealing with large amounts to data leads to overplotting. So far we've used alpha values to modify transparency from 0 (invisible) to 1 (solid), facets, and different geometric shapes to help alleviate this. Another is "binning". As long as you have the `hexbin` package installed, this can be easily accomplished with `geom_hex`. This "bins" counts of points into hexagons and colors the hexagons according to counts. Lighter colors mean higher counts. Changing the number of bins (default 30 x 30) decreases/increases the number of hexagons. For example, `bins = 40`
 
 ```{r}
 # install.packages("hexbin")
 ggplot(homes) +
   aes(x = FinSqFt, y = TotalValue) +
-  geom_hex() 
+  geom_hex(bins = 40) 
 
 ```
 
@@ -227,7 +228,7 @@ ggplot(homes) +
   aes(x = FinSqFt, y = TotalValue) +
   geom_point() +
   geom_smooth() + 
-  coord_cartesian(xlim = c(0,5000), # from 0 to 5,000
+  coord_cartesian(xlim = c(0, 5000), # from 0 to 5,000
                   ylim = c(0, 2e6)) # from 0 to $2,000,000
 
 ```
@@ -266,7 +267,7 @@ ggplot(homes) +
 
 ## Visualizing counts
 
-Recall the condition variable. We can quickly get counts of each condition using the table function:
+Recall the condition variable. We can quickly get counts of each condition using the `count()` function from the dplyr package:
 
 ```{r}
 homes %>% count(Condition)
@@ -308,6 +309,7 @@ ggplot(homes) +
 ```
 
 The y-axis indicates proportions instead of counts.
+
 
 ## Code along 4
 
