@@ -414,14 +414,27 @@ There was a boom sometime after 1750. Which year was it? Around 1950 it seems th
 
 The above plot shows some interesting trends and events, but it's hard to get precise years and numbers. Fortunately there are ways to make ggplot graphs interactive. Here's one way using the plotly package. plotly is package that allows you to make interactive web graphics. Simply call `ggplotly()` immediately after your ggplot code:
 
+Load plotly...
+
 ```{r}
 # install.packages("plotly")
 library(plotly)
+```
+
+Create plot as usual with ggplot2...
+
+```{r}
 ggplot(homes_year) +
   aes(x = YearBuilt, y = n) +
   geom_line()
+```
+
+Call `ggplotly()` to create an interactive plot
+
+```{r}
 ggplotly()
 ```
+
 
 Now we can interact with the plot to see information of interest. Hovering over points reveals precise information. We can also zoom in on portions of the plot. (Double-click in the plotting region to return to the full plot.)
 
@@ -607,9 +620,8 @@ leaflet(alb) %>%
 
 ## We're done!
 
-If you would like to talk more about ggplot2 or anything else statistics related, I would love to hear from you: `jcf2d@virginia.edu` or `statlab@virginia.edu`
+If you would like to talk more about ggplot2 or anything else statistics related, I would love to hear from you: `clayford@virginia.edu` or `statlab@virginia.edu`
 
-Want more ggplot2? Google `getting started with ggplot2` or `ggplot2 tutorial`. Also see the numerous examples provided with just about every ggplot2 function.
 
 ## References
 
