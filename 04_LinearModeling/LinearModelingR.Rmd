@@ -17,7 +17,7 @@ R code needs to be in "chunks" in an R Markdown Notebook. Below is an example of
 Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter* (Win/Linux) or *Cmd+Shift+Return* (Mac). 
 
 ```{r}
-x <- seq(-10, 10, by = 0.01)
+x <- seq(-6, 6, by = 0.1)
 y <- sin(x)
 plot(x, y, type = "l")
 ```
@@ -73,7 +73,7 @@ y is the combination of two parts:
 What if we were given this data and told to determine the process that generated it? In other words, work backwards and fill in the blanks:
 
 1. y = __ + __*x
-2. rnorm(n = 25, mean = 0, sd = ____)
+2. rnorm(n = 25, mean = 0, sd = __)
 
 _That's one way to think of linear modeling/regression_. You have some numeric response (or dependent) variable, and you want to find the model (or the formula) that generated the data. 
 
@@ -114,7 +114,7 @@ We could use our model estimates to generate data and see if they look similar t
 
 ```{r}
 d$y2 <- 11.135 + 5.042*d$x + rnorm(25, 0, 9.7)
-plot(y ~ x, data = d)
+plot(d$x, d$y)
 points(d$x, d$y2, col = "red")
 ```
 
@@ -129,7 +129,7 @@ d$y2 <- 11.135 + 5.042*d$x + rnorm(25, 0, 9.7)
 lines(density(d$y2), col = "red")
 ```
 
-This looks good as well. The distribution of our model-generated data is very similar to our observed data. You should do this more than once, say 50 times, to ensure the model consistently generates data similar to the observed data. We show one way to do that later in the workshop.
+This looks good as well. The distribution of our model-generated data is very similar to our observed data. You should do this more than once, say 50 times, to ensure the model consistently generates data similar to the observed data. We show one way to do that later in the presentation.
 
 Since we think our model is "good", we might use it to make a prediction. For example, when x = 10 what's the expected value of y? Put another way, what's the mean of y conditional on x = 10? We can do that with the `predict()` function.  The `interval = "confidence"` arguments says return a 95% confidence interval (CI) for this mean.
 
@@ -155,14 +155,13 @@ The x coefficient says that y increases by about 5 for every one-unit increase i
 
 ## CODE ALONG 1
 
-Let's see what happens when we fit a "bad" model. Below we simulate new set of data, like we did above, but this time we have a non-linear relationship.
+Let's see what happens when we fit a "bad" model. Below we simulate new set of data, like we did above, but this time we have a _non-linear_ relationship.
 
 ```{r}
 x <- seq(-10, 10, length.out = 100)
 y <- 2 + -2*x + -5*x^2 + 2+x^3
 set.seed(11)
-noise <- rnorm(n = 100, mean = 0, 
-               sd = 120)
+noise <- rnorm(n = 100, mean = 0, sd = 120)
 d <- data.frame(x, y = y + noise)
 plot(y ~ x, data = d)
 ```
@@ -184,8 +183,7 @@ lines(density(d$y2), col = "red")
 
 ```
 
-
-
+We talk about fitting non-linear effects in the _Non-Linear Effects_ section below.
 
 Let's do some linear modeling with real data. 
 
@@ -315,11 +313,11 @@ plot(m1)
 
 How to interpret plots:
 
-1. Residuals vs Fitted: should have a horizontal line with uniform and symmetric scatter of points; if not, evidence that SD is not constant
+1. Residuals vs Fitted: hope for uniform and symmetric scatter of points around 0; if not, evidence that SD is not constant and that your model is not good.
 
-2. Normal Q-Q: points should lie close to diagonal line; if not, evidence that noise is not drawn from N(0, SD)
+2. Normal Q-Q: hope points lie close to diagonal line; if not, evidence that noise is not drawn from N(0, SD)
 
-3. Scale-Location: should have a horizontal line with uniform scatter of point; (similar to #1 but easier to detect trend in dispersion)
+3. Scale-Location: hope for uniform scatter of points; similar to #1 but easier to detect trend in dispersion
 
 4. Residuals vs Leverage: points outside the contour lines are influential observations. Leverage is the distance from the center of all predictors. An observation with high leverage has substantial influence on the fitted value.
 
@@ -343,13 +341,12 @@ When dealing with a response that is strictly positive and very skew (like dolla
 
 ```{r}
 hist(log(homes$TotalValue))
-homes$logTotalValue <- log(homes$TotalValue)
 ```
 
 Let's try modeling log-transformed `TotalValue`.
 
 ```{r}
-m2 <- lm(logTotalValue ~ FinSqFt + Bedroom + LotSize, data = homes)
+m2 <- lm(log(TotalValue) ~ FinSqFt + Bedroom + LotSize, data = homes)
 ```
 
 The diagnostic plots look better. 
@@ -362,7 +359,7 @@ But is this a "good model"? Is our proposed model of weighted sums good? Let's s
 
 ```{r}
 sim2 <- simulate(m2, nsim = 50)
-plot(density(homes$ logTotalValue))
+plot(density(log(homes$TotalValue)))
 for(i in 1:50)lines(density(sim2[[i]]), lty = 2, col = "grey80")
 ```
 
@@ -488,7 +485,6 @@ summary(m4)
 The coefficients for Monticello and Western Albemarle are in relation to Albemarle HS. 
 
 ```{r}
-round(exp(coef(m4)),4)
 round(coef(m4),4)
 ```
 
@@ -498,8 +494,17 @@ It appears that the value of a home in Western Albemarle will be about 11% highe
 
 1. Insert a code chunk below and model `log(TotalValue)` as function of `FullBath`, `FinSqFt` and `Cooling.` Call your model `m5`. 
 
+```{r}
+m5 <- lm(log(TotalValue) ~ FullBath + FinSqFt + Cooling, data = homes)
+```
+
+
 
 2. What is the interpretation of Cooling? What is the baseline or reference level?
+
+```{r}
+coef(m5) |> exp() |> round(4)
+```
 
 
 
@@ -567,9 +572,19 @@ The effect of `FinSqFt` seems to taper off the more FullBaths a house has. But t
 
 1. Insert a code chunk below and model `log(TotalValue)` as function of `FullBath`, `FinSqFt`, `Cooling`, and the interaction of `FinSqFt` and `Cooling`. Call your model `m7`. Is the interaction warranted?
 
+```{r}
+m7 <- lm(log(TotalValue) ~ FullBath + FinSqFt + Cooling + FinSqFt:Cooling, 
+         data = homes)
+anova(m7)
+```
 
 
 2. Visualize the interaction using the `ggpredict` function. Perhaps use `[1000:4000 by=500]` to set the range of `FinSqFt` on the x-axis.
+
+```{r}
+plot(ggpredict(m7, terms = c("FinSqFt[1000:4000 by=500]", "Cooling")))
+```
+
 
 
 ## Wrap-up
@@ -671,7 +686,7 @@ Effect plots are our only hope for understanding this model.
 plot(ggpredict(nlm3, terms = c("FinSqFt[1000:3000 by=250]", "HSDistrict")))
 ```
 
-The effect of `FinSqFt` on `TotalValue` seems more dramatic in Western Albemarle once you go beyond 1500 sq ft.
+The effect of `FinSqFt` on `TotalValue` seems more dramatic in Western Albemarle.
 
 Does the model simulate data similar in distribution to the observed data?
 
@@ -687,14 +702,18 @@ We should still check model assumptions of constant variance and normal residual
 plot(nlm3)
 ```
 
-Homes 12, 40, 963 and 1810 seem to stand out. Let's have a look.
+Homes 13276, 15097, 19047, 19941, 24355, and 17241 are identified in the diagnostic plots. Let's have a look.
 
 ```{r}
-h <- c(12, 40, 963, 1810)
+h <- c(13276, 15097, 19047, 19941, 24355, 17241)
 homes[h,c("TotalValue", "FinSqFt", "LotSize")]
 ```
 
-Homes 12 and 40 are very low in TotalValue and the model way overpredicts their values. Home 963 has a massive TotalValue with 0 acres of LotSize. Home 1810 is on 611 acres and that value has a high leverage on its fitted value. 
+- Homes 13276, 19047 and 19941 have tiny TotalValues relative to their FinSqFt. Are these typos?
+- Home 24355 has an enormous LotSize!
+- Homes 17241 and 15097 have massive FinSqFt values. 
+
+Let's compare observed and fitted values. Notice the first five homes have fits that are way too big. The 5th home has a fitted value over `$127,000,000`! The last home is underfit by about `$10,000,000`.
 
 ```{r}
 cbind(obs = homes$TotalValue[h], fit = exp(fitted(nlm3)[h]))

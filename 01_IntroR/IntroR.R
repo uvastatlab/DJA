@@ -321,10 +321,10 @@ sum(homes$TotalValue > 1e6)
 # Taking the mean of 0,1 data returns percent of 1's
 mean(homes$TotalValue > 1e6)
 
-# How many homes with a totalrooms greater than 10?
+# How many homes with a TotalRooms greater than 10?
 sum(homes$TotalRooms > 10)
 
-# We have NAs in the LotSize column, so we need to tell R to ignore them:
+# We have NAs in the TotalRooms column, so we need to tell R to ignore them:
 sum(homes$TotalRooms > 10, na.rm = TRUE)
 mean(homes$TotalRooms > 10, na.rm = TRUE)
 
@@ -489,7 +489,7 @@ t.test(TotalValue ~ Remodeled, data = homes)
 
 # Does mean TotalValue differ between HSDistrict?
 aov.out <- aov(TotalValue ~ HSDistrict, 
-               data = subset(homes, HSDistrict != "Unassigned"))
+               data = homes)
 summary(aov.out)
 
 # Where are the differences? Get pairwise differences with Tukey's Honestly Significant Differences.

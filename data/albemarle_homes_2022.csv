@@ -11971,7 +11971,6 @@ YearBuilt,YearRemodeled,Condition,FinSqFt,Cooling,FP_Open,Bedroom,FullBath,HalfB
 2021,NA,Average,2041,Central Air,1,3,2,0,6,0.257,225000,479900,704900,679666,01/13/2021,Stony Point,Burley,Monticello,105,1,0,1
 2019,NA,Average,3387,Central Air,1,5,4,1,9,0.247,225000,589900,814900,869000,12/02/2021,Stony Point,Burley,Monticello,105,3,0,1
 2022,NA,Average,3447,Central Air,1,5,3,1,8,0.158,225000,329600,554600,885000,03/01/2022,Stony Point,Burley,Monticello,105,0,0,1
-2022,NA,Average,3498,Central Air,NA,NA,NA,NA,NA,0.159,225000,0,225000,225000,12/07/2021,Stony Point,Burley,Monticello,105,0,0,NA
 2021,NA,Average,2780,Central Air,1,3,3,1,6,0.159,225000,483800,708800,709007,12/03/2021,Stony Point,Burley,Monticello,105,1,0,1
 2022,NA,Average,3138,Central Air,1,6,5,1,10,0.218,225000,515000,740000,994015,03/02/2022,Stony Point,Burley,Monticello,105,0,0,1
 2021,NA,Average,1932,Central Air,2,2,3,0,5,0.179,225000,542600,767600,225000,05/10/2021,Stony Point,Burley,Monticello,105,1,0,1
@@ -26111,10 +26110,6 @@ YearBuilt,YearRemodeled,Condition,FinSqFt,Cooling,FP_Open,Bedroom,FullBath,HalfB
 1970,NA,Good,2846,Central Air,3,4,3,1,8,5.21,163300,458200,621500,355000,06/07/2002,Broadus Wood,Jouett,Albemarle,102.02,52,0,1
 1968,NA,Average,1941,Central Air,3,4,3,0,10,5.67,153000,408500,561500,425000,10/09/2013,Broadus Wood,Jouett,Albemarle,102.02,54,0,1
 1974,NA,Good,2400,Central Air,2,3,4,1,7,4.22,150000,645500,795500,615500,04/14/2017,Broadus Wood,Jouett,Albemarle,102.02,48,0,1
-2022,NA,Average,1982,Central Air,0,NA,NA,NA,NA,0.108,82500,0,82500,460000,12/09/2021,Agnor-Hurt,Burley,Albemarle,108,0,0,0
-2022,NA,Average,1982,Central Air,0,NA,NA,NA,NA,0.073,75000,0,75000,460000,12/09/2021,Agnor-Hurt,Burley,Albemarle,108,0,0,0
-2022,NA,Average,1982,Central Air,0,NA,NA,NA,NA,0.075,75000,0,75000,460000,12/09/2021,Agnor-Hurt,Burley,Albemarle,108,0,0,0
-2022,NA,Average,1982,Central Air,0,NA,NA,NA,NA,0.095,82500,0,82500,460000,12/09/2021,Agnor-Hurt,Burley,Albemarle,108,0,0,0
 1965,NA,Average,3125,Central Air,3,6,3,1,11,3.69,154800,432000,586800,474900,08/11/2014,Woodbrook,Jouett,Albemarle,106.01,57,0,1
 1962,NA,Average,3386,Central Air,3,4,3,0,7,3.21,148400,476900,625300,0,02/26/1997,Woodbrook,Jouett,Albemarle,106.01,60,0,1
 1961,NA,Average,2117,Central Air,2,4,3,0,8,2.58,147000,325700,472700,0,12/30/1899,Woodbrook,Jouett,Albemarle,106.01,61,0,1
@@ -30514,12 +30509,6 @@ YearBuilt,YearRemodeled,Condition,FinSqFt,Cooling,FP_Open,Bedroom,FullBath,HalfB
 2020,NA,Average,2152,Central Air,1,3,2,1,7,0.109,180000,287800,467800,503050,04/12/2021,Brownsville,Henley,Western Albemarle,111,2,0,1
 2021,NA,Average,2070,Central Air,1,3,2,1,6,0.109,180000,294400,474400,520000,08/02/2021,Brownsville,Henley,Western Albemarle,111,1,0,1
 2021,NA,Average,2070,Central Air,1,3,2,1,6,0.135,180000,294400,474400,540744,08/16/2021,Brownsville,Henley,Western Albemarle,111,1,0,1
-2022,NA,Average,2516,Central Air,0,NA,NA,NA,NA,0.064,118300,0,118300,1256483,10/27/2021,Brownsville,Henley,Western Albemarle,111,0,0,0
-2022,NA,Average,2582,Central Air,0,NA,NA,NA,NA,0.037,107500,0,107500,1256483,10/27/2021,Brownsville,Henley,Western Albemarle,111,0,0,0
-2022,NA,Average,2582,Central Air,0,NA,NA,NA,NA,0.038,107500,0,107500,1256483,10/27/2021,Brownsville,Henley,Western Albemarle,111,0,0,0
-2022,NA,Average,3080,Central Air,1,NA,NA,NA,NA,0.038,107500,0,107500,1256483,10/27/2021,Brownsville,Henley,Western Albemarle,111,0,0,1
-2022,NA,Average,3080,Central Air,1,NA,NA,NA,NA,0.038,107500,0,107500,1256483,10/27/2021,Brownsville,Henley,Western Albemarle,111,0,0,1
-2022,NA,Average,3098,Central Air,1,NA,NA,NA,NA,0.061,118300,0,118300,1256483,10/27/2021,Brownsville,Henley,Western Albemarle,111,0,0,1
 2019,NA,Average,3059,Central Air,1,4,4,1,8,0.057,118300,458200,576500,554405,03/06/2020,Brownsville,Henley,Western Albemarle,111,3,0,1
 2019,NA,Average,3050,Central Air,1,4,4,1,8,0.039,107500,442300,549800,504900,05/20/2020,Brownsville,Henley,Western Albemarle,111,3,0,1
 2019,NA,Average,3059,Central Air,1,5,4,1,8,0.039,107500,454000,561500,515165,08/30/2019,Brownsville,Henley,Western Albemarle,111,3,0,1

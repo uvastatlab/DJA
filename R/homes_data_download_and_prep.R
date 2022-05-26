@@ -97,7 +97,7 @@ homes <- homes %>%
 homes <- homes %>% 
   filter(!is.na(FinSqFt) & FinSqFt > 0)
 
-# more likely to use this as age than year, create age of home
+# create age of home
 homes <- homes %>% 
   mutate(Age = 2022 - YearBuilt)
 
@@ -129,8 +129,8 @@ summary(homes$YearRemodeled) # NA not remodeled; not sure about 8
 homes <- homes %>% 
   mutate(Remodeled = if_else(!is.na(YearRemodeled), 1, 0))
 
-# drop NumStories and Cards
-homes <- homes %>% select(-c(NumStories, Cards))
+# drop NumStories, Cards and UseCode
+homes <- homes %>% select(-c(NumStories, Cards, UseCode))
 
 # cooling
 table(homes$Cooling) # fix factor -- assume 00, M1, and NULL are no air
@@ -149,6 +149,12 @@ homes <- homes %>%
   rename(LastSaleDate = LastSaleDate1)
 
 rm(cond_levels)
+
+homes <- homes %>% 
+  filter(!is.na(Cooling)) %>% 
+  filter(HSDistrict != "Unassigned") %>% 
+  filter(!is.na(YearBuilt)) %>% 
+  filter(!is.na(Bedroom))
 
 # save everything to working directory
 save.image("albemarle_homes_2022.Rdata") 
