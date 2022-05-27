@@ -1,0 +1,35 @@
+Start RStudio. 
+RStudio runs R for us.
+R is in the console.
+
+Use R as calculator.
+Assignment: Pi
+Keyboard shortcut: Alt + - (Win/Linux) or Option + - (Mac).
+Saved in Global Environment.
+
+
+Using functions: sqrt(), round()
+arrow up and down to recall console commands
+
+Example of function with no closing parantheses.
+Blinking cursor after a plus sign = incomplete command.
+Hit Esc to bail out.
+
+Ctrl + L: clear the console
+
+Example of vector.
+ages of students using c()
+summary()
+hist()
+stem()
+
+Save work in a R script.
+Text file. Hitting enter goes to a new line.
+To submit code:
+Ctrl + Enter (Win/Linux) or Cmd + Return (Mac).
+Add comments.
+
+Save R script. RStudio adds a .R extension
+Close script, close RStudio, open, load script.
+
+Go to R script for session.
