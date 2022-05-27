@@ -7,9 +7,20 @@
 
 # Packages ----------------------------------------------------------------
 
+# REMINDER:
+
+# To submit a line of R code from a script: place the cursor in the line and hit
+# Ctrl + Enter (Win/Linux) or Cmd + Return (Mac).
+
 library(dplyr)
 library(tibble)
 library(lubridate)
+
+# If you get an error message that says something like: 
+# Error in library(dplyr) : there is no package called ‘dplyr’
+# Then you don't have the package installed.
+
+# Go to Tools...Install Packages... and install the package.
 
 # dplyr and lubridate have functions with the same names as functions loaded
 # when R starts. The dplyr and lubridate functions "mask" the base R functions.
@@ -96,11 +107,17 @@ tiny_houses <- homes %>%
   mutate(PerSqFt = round(TotalValue/FinSqFt, 2)) %>% 
   arrange(desc(TotalValue))
 
-# NOTE: you will often see "pipeline" code such as this in online books, blogs,
-# and Stack Overflow posts. The author may even say how "easy" dplyr makes
-# working with data. But keep in mind the code took much longer to write than it
-# takes for you to read it. Just because dplyr code is relatively easy to read
-# does not mean it's always going to be fast to write.
+# NOTE 1: you will often see "pipeline" code such as this in online books,
+# blogs, and Stack Overflow posts. The author may even say how "easy" dplyr
+# makes working with data. But keep in mind the code took much longer to write
+# than it takes for you to read it. Just because dplyr code is relatively easy
+# to read does not mean it's always going to be fast to write.
+
+# NOTE 2: As of R version 4.1, there is another pipe available to use: `|>`.
+# This is known as the "Base R pipe". The `%>%` pipe is known as the "magrittr"
+# pipe because it comes from the "magrittr" package. It appears some prominent R
+# developers and users are beginning to shift to using the `|>` pipe. But either
+# is fine to use with dplyr.
 
 
 # Tibbles -----------------------------------------------------------------
@@ -142,7 +159,7 @@ homes
 
 # take homes, 
 # then group by Condition, 
-# then find the median totalvalue of homes within each Condition
+# then find the median TotalValue of homes within each Condition
 
 homes %>% 
   group_by(Condition) %>% 
@@ -185,15 +202,11 @@ aggregate(TotalValue ~ CensusTract, data = homes, median) %>%
 
 # Create a new data frame called "pre1900"...
 
-# - that contains homes built before 1900
-# - that have never been remodeled
+# - that contains homes built before 1900 AND have never been remodeled
 # - that only has YearBuilt, TotalValue, and FinSqFt columns, 
 # - and that is sorted in ascending order by YearBuilt
 
-pre1900 <- homes %>% 
-  filter(Remodeled == 0 & YearBuilt < 1900) %>% 
-  select(YearBuilt, TotalValue, FinSqFt) %>% 
-  arrange(YearBuilt)
+
 
 
 # Code along 2 ------------------------------------------------------------
@@ -202,15 +215,11 @@ pre1900 <- homes %>%
 
 # - that contains median home values by YearBuilt in new column "MedianValue" 
 # - that contains number of homes per YearBuilt in new column called "n". 
+#   Use the n() function to calculate number of homes. 
 # - that is arranged by YearBuilt 
 # - that only has YearBuilt, MedianValue, and n columns.
 
-values_by_year <- homes %>% 
-  group_by(YearBuilt) %>% 
-  summarize(MedianValue = median(TotalValue), 
-            n = n()) %>% 
-  arrange(YearBuilt) %>% 
-  select(YearBuilt, MedianValue, n)
+
 
 
 
@@ -227,6 +236,7 @@ homes %>%
 # "total"
 homes %>% 
   count(HSDistrict)
+
 
 # Notice the result is a data frame/tibble.
 
@@ -264,11 +274,6 @@ xtabs(~ HSDistrict + Condition + Cooling, data = homes, addNA = TRUE)
 # Count up the number of homes in each CensusTract for those records not missing
 # YearBuilt or CensusTract, and arrange in descending order
 
-homes %>% 
-  filter(!is.na(YearBuilt) & !is.na(CensusTract)) %>% 
-  count(CensusTract) %>% 
-  arrange(desc(n)) %>% 
-  print(n = Inf)
 
 
 # Calculating proportions -------------------------------------------------
@@ -311,26 +316,12 @@ xtabs(~ Condition + Remodeled, data = homes) %>%
 # (1) Of all homes on over 10 acres of land (LotSize), what proportion are in
 # each HSDistrict?
 
-homes %>% 
-  filter(LotSize > 10) %>% 
-  count(HSDistrict) %>% 
-  mutate(p = n/sum(n))
+
 
 # (2) What is the proportion of homes over 10 acres of land (LotSize) within
 # each school district?
 
-homes %>% 
-  group_by(HSDistrict) %>% 
-  summarise(n = n(), 
-            over10 = sum(LotSize > 10),
-            p = over10/n)
 
-# Base R solution
-xtabs(~ HSDistrict + (LotSize > 10), data = homes)
-xtabs(~ HSDistrict + (LotSize > 10), data = homes) %>% 
-  proportions(margin = 2)
-xtabs(~ HSDistrict + (LotSize > 10), data = homes) %>% 
-  proportions(margin = 1)
 
 
 # Recoding variables ------------------------------------------------------
@@ -413,28 +404,7 @@ homes %>%
 # 500,001 - 1,000,000
 # over 1,000,000
 
-homes <- homes %>% 
-  mutate(PriceCategory = case_when(
-    TotalValue <= 2e5 ~ "200,000 or less",
-    between(TotalValue, 2e5 + 1, 500000) ~ "200,001 - 500,000",
-    between(TotalValue, 5e5 + 1, 1e6) ~ "500,001 - 1,000,000",
-    TotalValue > 1e6 ~ "Over 1,000,000",
-  ))
 
-homes %>% 
-  count(PriceCategory)
-
-
-homes <- homes %>% 
-  mutate(PriceCategory = cut(TotalValue, 
-                             breaks = c(-Inf, 200000, 500000, 1e6, Inf),
-                             labels = c("200,000 or less",
-                                        "200,001 - 500,000",
-                                        "500,001 - 1,000,000",
-                                        "over 1,000,000")))
-
-homes %>% 
-  count(PriceCategory)
 
 
 # Formatting dates --------------------------------------------------------
@@ -475,10 +445,8 @@ barplot(table(homes$SaleMonth))
 # Extract the day of the week of the Last Sale Date and save into column called
 # SaleDay using the wday() function. Set the label argument to TRUE.
 
-homes <- homes %>% 
-  mutate(SaleDay = wday(LastSaleDate, label = TRUE))
 
-barplot(table(homes$SaleDay))
+
 
 # Merging/Joining data ----------------------------------------------------
 
@@ -565,11 +533,8 @@ med_home
 # Merge the median home income data with the median home value data using a left
 # join with med_home on the left.
 
-d <- left_join(med_home, mhi, by = "CensusTract")
-d
 
-plot(estimate ~ med_value, data = d)
-cor.test(~ estimate + med_value, data = d)
+
 
 # Done! -------------------------------------------------------------------
 
@@ -710,12 +675,12 @@ pivot_wider(long,
 # The names_prefix argument lets us prepend "test" to the column names.
 
 
-# Example: the following data from the Guttmacher Institute, a “research and
+# Example: the following data from the Guttmacher Institute, a "research and
 # policy organization committed to advancing sexual and reproductive health and
-# rights.” They recently released its latest estimates of annual pregnancies,
+# rights." They recently released its latest estimates of annual pregnancies,
 # births, and abortions among women in the US. (https://osf.io/kthnf/)
 
-pba <- readRDS('https://github.com/uvastatlab/DJA/raw/main/data/NationalAndStatePregnancy_PublicUse.rds')
+pba <- readRDS(url('https://github.com/uvastatlab/DJA/raw/main/data/NationalAndStatePregnancy_PublicUse.rds'))
 
 # This is a wide data set with 103 columns. 
 ncol(pba)
@@ -743,11 +708,12 @@ unique(pbaL$age_group)
 # Example: compare birth rate trends in groups "1517", "1819", and "2024" in all
 # 50 states.
 
-ggplot(
-  filter(pbaL, 
-         age_group %in% c("1517", "1819", "2024"))) + 
+pbaL %>% 
+  filter(age_group %in% c("1517", "1819", "2024")) %>% 
+  ggplot() +
   aes(x = year, y = rate, color = age_group) +
   geom_line() +
   facet_wrap(~state)
 
 # Birth rates among these age groups are falling in all 50 states.
+
