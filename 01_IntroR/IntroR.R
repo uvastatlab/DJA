@@ -11,7 +11,19 @@
 # contains instructions and tips for using R as well as examples of data
 # analysis.
 
-# Text with a "#" in front of it are called comments.
+# Text with a "#" in front of it are called comments. This is a comment.
+
+# To submit a line of R code from a script: place the cursor in the line and hit
+# Ctrl + Enter (Win/Linux) or Cmd + Return (Mac).
+
+# To submit a many lines of R code from a script: highlight the lines and hit
+# Ctrl + Enter (Win/Linux) or Cmd + Return (Mac).
+
+# Try it! 
+x <- -10:10                # numbers -10 through 10
+y <- x^2                   # square x values
+plot(x, y, type = "l")     # plot x and y as a line
+rm(x, y)                   # remove x and y from memory
 
 
 # Set your working directory ----------------------------------------------
@@ -24,7 +36,9 @@
 # this script, we want to set our working directory to where you downloaded the
 # workshop files.
 
+###
 # To set working directory via point-and-click:
+###
 
 # (1) Session...Set Working Directory...Choose Directory. In the dialog,
 # highlight the directory and click Open.
@@ -32,8 +46,10 @@
 # (2) Use the Files tab. Navigate to folder and select "Set As Working
 # Directory" under More
 
-
+###
 # To set working directory with R code:
+###
+
 # use setwd() function; path must be in quotes
 
 # In RStudio, you can use the TAB key in the quotes to auto-complete the path.
@@ -46,7 +62,7 @@
 # CODE ALONG #1 -----------------------------------------------------------
 
 # Set your working directory to the folder on the computer that contains the
-# workshop files.
+# workshop files. Remember to submit code from an R script
 
 setwd("")
 
@@ -144,7 +160,8 @@ table(homes$HSDistrict)
 
 
 
-# (3) How many homes are in "Very Poor" condition?
+# (3) How many homes are in "Very Poor" condition? The Condition column contains this information.
+
 
 
 
@@ -171,11 +188,11 @@ table(homes$HSDistrict)
 # 1e7 = 10,000,000 (ie, 1 with 7 zeroes after it)
 subset(homes, TotalValue > 1e7)
 
-# Show all homes with a Condition of Very Poor (notice we use two equal signs)
-subset(homes, Condition == "Very Poor")
+# Show all homes with a Condition of "Not Rated" (notice we use two equal signs)
+subset(homes, Condition == "Not Rated")
 
 # Sometimes it can help to view the results using View()
-View(subset(homes, Condition == "Very Poor"))
+View(subset(homes, Condition == "Not Rated"))
 
 
 # Show homes in "Very Poor" condition built before 1900
@@ -189,7 +206,7 @@ View(subset(homes, Condition == "Very Poor" & YearBuilt < 1800))
 # Define multiple equalities using %in% operator
 homes2 <- subset(homes, Condition %in% c("Average", "Good", "Excellent"))
 
-# Tip: make sure the values are spelled correctly!
+# Tip: make sure the values are spelled correctly! 
 
 # CODE ALONG #3 -----------------------------------------------------------
 
@@ -206,7 +223,7 @@ homes2 <- subset(homes, Condition %in% c("Average", "Good", "Excellent"))
 # (1) Deriving new columns (or variables) based on calculations
 
 # Notice below we just add whatever column name we want to create after the
-# dollar sign and perform the calculation.
+# dollar sign operator and perform the calculation.
 
 # Divide TotalValue by FinSqFt to get PricePerSqFt
 homes$PricePerSqFt <- homes$TotalValue/homes$FinSqFt
@@ -225,7 +242,7 @@ homes$logTotalValue <- log(homes$TotalValue)
 # than or equal to 2008, set to 1, otherwise 0. 
 # syntax: ifelse(condition, value if TRUE, value if FALSE)
 homes$After2008 <- ifelse(homes$YearBuilt >= 2008, 1, 0)
-
+table(homes$After2008)
 
 # (3) Creating Factors
 
@@ -235,8 +252,15 @@ homes$After2008 <- ifelse(homes$YearBuilt >= 2008, 1, 0)
 # can use the factor() function for this. 
 
 # Convert Condition column to factor
-homes$Condition <- factor(homes$Condition)
 
+# BEFORE: character
+str(homes$Condition)
+summary(homes$Condition)
+
+# AFTER: factor
+homes$Condition <- factor(homes$Condition)
+str(homes$Condition)
+summary(homes$Condition)
 
 # (4) Setting the order of levels in a factor
 
@@ -247,8 +271,18 @@ levels(homes$Condition)
 table(homes$Condition)
 
 
-# Let's set the order to Substandard, Poor, Fair, Average, Good, Excellent;
-# We can do that with the factor function and the levels argument
+# Let's set the order to 
+
+# "Not Rated"
+# "Very Poor" 
+# "Poor" 
+# "Fair" 
+# "Average"
+# "Good" 
+# "Excellent"
+
+# We can do that with the factor function and the levels argument. Specify the
+# order of the levels as a vector using the c() function.
 homes$Condition <- factor(homes$Condition, 
                           levels = c("Not Rated", "Very Poor", "Poor", "Fair", 
                                      "Average", "Good", "Excellent"))
@@ -270,7 +304,6 @@ homes$After2008 <- NULL
 
 # Let's add an indicator called Pre20thCentury that has 1 if a home was built
 # before 1900 and a 0 otherwise
-
 
 
 
@@ -312,6 +345,8 @@ range(homes$TotalValue) # returns min and max values; see also min() and max()
 # The following generates a vector of TRUE/FALSE values:
 homes$TotalValue > 1e6
 
+# Reminder: Ctrl + L clears the console
+
 # In R, TRUE = 1 and FALSE = 0, so we can do math with TRUE/FALSE values. How
 # many TRUES?
 sum(homes$TotalValue > 1e6)
@@ -344,13 +379,13 @@ mean(homes$TotalRooms > 10, na.rm = TRUE)
 # for contingency tables (or cross tabs) use the table function
 # syntax: table(row variable, column variable)
 
-# cross tab of Remodeled and HS Disrict
-table(homes$Remodeled, homes$HSDistrict)
+# cross tab of Cooling and HS District
+table(homes$Cooling, homes$HSDistrict)
 
 # calculate percents with the proportions() function. 
 
 # First we save the table object as tab1
-tab1 <- table(homes$Remodeled, homes$HSDistrict)
+tab1 <- table(homes$Cooling, homes$HSDistrict)
 
 # print the table
 tab1
@@ -376,8 +411,8 @@ aggregate(TotalValue ~ HSDistrict, data = homes, median)
 # mean home value by HSDistrict
 aggregate(TotalValue ~ HSDistrict, data = homes, mean)
 
-# median TotalValue by Remodeled and HSDistrict
-aggregate(TotalValue ~ Remodeled + HSDistrict, homes, median)
+# median TotalValue by Cooling and HSDistrict
+aggregate(TotalValue ~ Cooling + HSDistrict, homes, median)
 
 
 
@@ -415,6 +450,9 @@ plot(log(TotalValue) ~ log(FinSqFt), data = homes,
 hist(homes$TotalValue) # skew
 hist(log(homes$TotalValue)) # more symmetric
 
+# smooth histograms, also called density plots
+plot(density(homes$TotalValue))
+plot(density(log(homes$TotalValue)))
 
 # boxplots - visualize the distribution of a numeric value by a categorical
 # variable; visualize the five number summary (Min, 25%, Median, 75%, Max)
@@ -476,11 +514,11 @@ ggplot(homes, aes(x = FinSqFt, y = TotalValue)) +
   geom_smooth() +
   facet_wrap(~HSDistrict)
 
-# We'll cover more ggplot2 in the data visualization workshop
+# We'll cover more ggplot2 in the data visualization session!
 
 # Basic statistics examples -----------------------------------------------
 
-# The t-test: Comparing two means
+# The t-test: Comparing two means. 
 
 # Does mean TotalValue differ between remodeled and unremodeled homes?
 t.test(TotalValue ~ Remodeled, data = homes)
@@ -504,7 +542,7 @@ mod <- lm(TotalValue ~ FinSqFt, data = homes)
 # summary of the model
 summary(mod) 
 
-# Interpretation: Each additional square foot adds about $280 to the TotalValue
+# Interpretation: Each additional square foot adds about $329 to the TotalValue
 # (If this is a good model)
 
 # Is this a "good" model? Calling plot on a model object and specifying "which =
@@ -512,7 +550,7 @@ summary(mod)
 plot(mod, which = 1)
 
 # Ideally points will be evenly distributed around 0. That's not the case here.
-# Our fitted straight line is vastly under-predicting many homes.
+# Our fitted straight line model is vastly under-predicting many homes.
 
 # One approach to address this is to log transform the variables.
 # Notice the relationship seems more linear.
@@ -531,7 +569,7 @@ summary(mod2)
 plot(mod2, which = 1)
 
 
-# We'll learn more about linear modeling in the linear modeling workshop.
+# We'll learn more about linear modeling in the linear modeling session.
 
 
 # Saving R objects --------------------------------------------------------
@@ -639,6 +677,9 @@ reTax(value = 455000)
 # frame.
 
 homes$RealEstateTax <- reTax(homes$TotalValue)
+summary(homes$RealEstateTax)
+
+# The median real estate tax is $3,436!
 
 # We can also make the function more robust by checking the input is numeric.
 # Notice we put multiple lines of code between curly braces. The is.numeric()
@@ -658,5 +699,5 @@ reTax(387000)
 
 # When you close R, the reTax function will be removed from memory.
 
-
+# The End
 
