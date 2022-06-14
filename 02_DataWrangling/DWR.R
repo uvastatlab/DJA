@@ -126,27 +126,18 @@ tiny_houses <- homes %>%
 # with dplyr. The tibble package provides the as_tibble() function for
 # converting a data frame into a tibble.
 
-tiny_houses_tbl <- as_tibble(tiny_houses)
+# The biggest difference (but not the only difference) is how it prints. Tibbles
+# include metadata. And for large data frames, it only prints the first few rows.
 
-# Tibbles versus data frames - two key differences (not all)
+# Let's print the homes data frame to the console
+homes
 
-# (1) They print differently. tibbles include metadata. For large data frames,
-# it only prints the first few rows.
-tiny_houses_tbl
-tiny_houses
-
-# (2) Tibbles are always Tibbles, not vectors
-tiny_houses_tbl[,1]
-tiny_houses[,1] # vector
-
+# Now convert our homes data frame to a tibble and print to the console.
+homes <- as_tibble(homes)
+homes
 
 # tibble and dplyr belong to a collection of packages known as the Tidyverse.
 
-# Let's convert our homes data frame to a tibble.
-homes <- as_tibble(homes)
-
-# Notice how it prints to the console
-homes
 
 # Grouped data ------------------------------------------------------------
 
@@ -257,16 +248,13 @@ homes %>%
   group_by(HSDistrict, Condition, Cooling) %>% 
   count()
 
-# Base R returns an array (3D table) but does not include NA!
+# Base R returns an array (3D table) 
 table(homes$HSDistrict, homes$Condition, homes$Cooling)
 
-# To return NA we include usena = "ifany"
-table(homes$HSDistrict, homes$Condition, homes$Cooling, useNA = "ifany")
-
-# xtabs() uses formula notation like aggregate(), but uses addNA = TRUE
+# xtabs() uses formula notation like aggregate()
 xtabs(~ HSDistrict, data = homes)
 xtabs(~ HSDistrict + Condition, data = homes)
-xtabs(~ HSDistrict + Condition + Cooling, data = homes, addNA = TRUE)
+xtabs(~ HSDistrict + Condition + Cooling, data = homes)
 
 
 # Code along 3 ------------------------------------------------------------
@@ -361,16 +349,11 @@ homes %>%
 # Average (Average)
 # Above Average (Good, Excellent)
 
-# Remember it's a factor
-str(homes$Condition)
-
-# We have to first convert to character type.
 homes %>% 
-  mutate(Condition = as.character(Condition)) %>% 
   mutate(Condition2 = case_when(
     Condition %in% c("Very Poor", "Poor", "Fair") ~ "Below Average",
-    Condition %in% c("Good", "Excellent") ~ "Above Average",
-    TRUE ~ Condition
+    Condition == "Average" ~ "Average",
+    Condition %in% c("Good", "Excellent") ~ "Above Average"
   )) %>% 
   select(Condition, Condition2) 
 
@@ -541,10 +524,9 @@ med_home
 # That's enough data wrangling for one day! 
 
 # Data wrangling is often a frustrating, time-consuming process. Every data set
-# is different. It's normal to struggle a bit, make mistakes, Google for help,
-# patch together code snippets, etc. Who merges data every day? Who recodes
-# variables every day? Be kind to yourself and others. We're all doing the best
-# we can.
+# is different. It's normal to struggle, make mistakes, Google for help, patch
+# together code snippets, etc. Who merges data every day? Who recodes variables
+# every day? Be kind to yourself and others. We're all doing the best we can.
 
 
 

@@ -9,7 +9,8 @@ Saved in Global Environment.
 
 
 Using functions: sqrt(), round()
-arrow up and down to recall console commands
+Does not change value in global environment.
+Arrow up and down to recall console commands.
 
 Example of function with no closing parantheses.
 Blinking cursor after a plus sign = incomplete command.
