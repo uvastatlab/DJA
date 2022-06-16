@@ -1,6 +1,6 @@
 ---
 title: "Data Visualization in R"
-author: "Clay Ford, Statistical Research Consultant, UVA Library"
+author: "Clay Ford, UVA Library"
 output: html_notebook
 editor_options: 
   chunk_output_type: inline
@@ -76,6 +76,15 @@ Variable name definitions:
 -   *Remodeled*: indicator if house has been remodeled (0=no, 1=yes)
 -   *FP*: indicator if house has fireplace (0=no, 1=yes)
 
+## Load packages we'll use today
+
+```{r}
+library(ggplot2) 
+library(dplyr)
+library(scales) # for formatting axis tick labels
+```
+
+
 ## Intro to ggplot2
 
 The ggplot2 package implements *The Grammar of Graphics* as defined in the book of the same name by Leland Wilkinson.
@@ -84,11 +93,8 @@ It requires your data be in a data frame (or tibble).
 
 Let's do a quick example. How does the total value of a home relate to its size in finished square feet? Plot TotalValue versus FinSqFt to create a scatter plot.
 
-First we need to load the ggplot2 package. Only do this once per R session. We also load the dplyr package because we'll use it later.
 
 ```{r}
-library(ggplot2) 
-library(dplyr)
 ggplot(homes) +
   aes(x = FinSqFt, y = TotalValue) +
   geom_point() 
@@ -235,10 +241,9 @@ ggplot(homes) +
 
 If presenting this plot to an audience, tell them it's zoomed in and looking at a subset of your data.
 
-The numbers are a little hard to read on the y-axis. We can format them as dollar amounts using the labels argument in the `scale_y_continuous()` function. To do this we need to load the scales package, which is installed when you install the ggplot2 package.
+The numbers are a little hard to read on the y-axis. We can format them as dollar amounts using the labels argument in the `scale_y_continuous()` function. To do this we can use the `dollar` function from the scales package, which is installed when you install the ggplot2 package.
 
 ```{r}
-library(scales) # for the dollar function
 ggplot(homes) +
   aes(x = FinSqFt, y = TotalValue) +
   geom_point() +
@@ -304,8 +309,8 @@ The large number of Average homes makes it difficult to see the counts for the o
 ```{r}
 ggplot(homes) +
   aes(x = Condition, fill = Cooling) +
-  geom_bar(position = "fill")
-
+  geom_bar(position = "fill") +
+  ylab("proportion")
 ```
 
 The y-axis indicates proportions instead of counts.
@@ -371,7 +376,7 @@ Boxplots and violin plots obscure the total number within in each group. That's 
 ```{r}
 ggplot(homes) +
   aes(x = ESDistrict, y = TotalValue) +
-  geom_jitter(width = 0.2, height = 0, alpha = 1/6) +
+  geom_jitter(width = 0.2, height = 0, shape = ".") +
   coord_flip(ylim = c(0,2e6))
 
 ```
@@ -588,10 +593,12 @@ If we like we can shade the census tract regions according to a summary statisti
 
 ```{r}
 med_tv <- homes %>%
+  filter(!is.na(CensusTract)) %>% 
   group_by(CensusTract) %>% 
   summarize(TotalValue = median(TotalValue))
 
-alb <- left_join(alb, med_tv, by = c("NAME" = "CensusTract"))
+alb_med_tv <- left_join(alb, med_tv, by = c("NAME" = "CensusTract")) %>% 
+  filter(!is.na(TotalValue))
 
 ```
 
@@ -600,7 +607,7 @@ To shade the census tract regions we once again use `addPolygons()`. This time w
 ```{r}
 # create color palette for shading census tracts
 pal <-  colorNumeric("YlOrRd", alb$TotalValue)
-leaflet(alb) %>% 
+leaflet(alb_med_tv) %>% 
   addTiles() %>% 
   addPolygons() %>% 
   addLabelOnlyMarkers(lng = ~INTPTLON, lat = ~INTPTLAT, label = ~NAME,

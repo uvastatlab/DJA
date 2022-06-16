@@ -1,5 +1,5 @@
 ---
-title: "Statistics Review"
+title: "Quick Review of the Normal Distribution"
 author: "Clay Ford"
 date: "Summer 2022"
 output: slidy_presentation
@@ -19,7 +19,7 @@ curve(dnorm(x), from = -3, to = 3, ylab = "")
 
 ## The Normal Distribution
 
-The mean is the hump (red line). The standard deviation is the _inflection point_, where the curve goes from _concave down_ to _concave up_ (blue lines). It measures spread. Below we see the mean is 0 and the standard deviation is 1.
+The mean is the top of the hump (red line). The standard deviation is the _inflection point_, where the curve goes from _concave down_ to _concave up_ (blue lines). It measures spread. Below we see the mean is 0 and the standard deviation is 1.
 
 ```{r}
 curve(dnorm(x), from = -3, to = 3, ylab = "")
@@ -45,7 +45,7 @@ par(op)
 
 Since the mean and standard deviation completely determine the shape of the curve, we call them _parameters_. Statisticians use the Greek symbols $\mu$ (mu) to represent the mean and $\sigma$ (sigma) to represent the standard deviation. 
 
-Here's the formula to draw the line from the [wikipedia article](https://en.wikipedia.org/wiki/Normal_distribution). There is nothing "Normal" about it! It looks pretty terrible! Fortunately, unless you teach a statistics class, you don't really need to remember it.
+Here's the formula to draw the line from the Normal distribution [Wikipedia article](https://en.wikipedia.org/wiki/Normal_distribution). There is nothing "Normal" about it! It looks pretty terrible! Fortunately, unless you teach a statistics class, you don't need to remember it.
 
 ![](wikipedia.png)
 
@@ -53,11 +53,10 @@ Here's the formula to draw the line from the [wikipedia article](https://en.wiki
 
 Calling the Normal distribution a _probability distribution_ means the area under the curve is equal to 1, or 100%. 
 
-If you ever take Mathematical Statistics, a common ~~hazing ritual~~ exercise is to struggle with calculus to prove the area under probability distributions are equal to 1.
 
 ## Why do we care about the Normal distribution?
 
-Take a look at this histogram of the heights of 250 randomly sampled US males. Does it look familiar?
+Take a look at this histogram of the heights of 250 randomly sampled US males. Most people are between 65 and 75 inches tall. Does the shape look familiar?
 
 ```{r}
 set.seed(1)
@@ -97,11 +96,11 @@ R makes is pretty easy to find the area under the normal curve with the `pnorm()
 pnorm(76, mean = mean(heights), sd = sd(heights), lower.tail = FALSE)
 ```
 
-It appears there's about a 1% chance (1 in 100) that a randomly selected US male will be taller than 6 feet 4 inches.
+0.008 rounds to about 0.01, or 0.01 $\times$ 100 = 1%. It appears there's about a 1% chance (1 in 100) that a randomly selected US male will be taller than 6 feet 4 inches.
 
 ## Simulating data from a Normal distribution
 
-Did you really think I randomly sampled 250 US males and got their heights? I would never do that. It's too impractical. Instead I randomly sampled values from a Normal distribution with mean 69 inches and standard deviation 3 inches. I did that in R using the `rnorm()` function as follows. (The `set.seed(1)` code ensures you and I generate the same "random" data. Change the 1 to another positive integer and you'll get another random set of data.)
+I didn't really sample 250 US males and measure their heights? Instead I randomly sampled values from a Normal distribution with mean 69 inches and standard deviation 3 inches. I did that in R using the `rnorm()` function as follows. (The `set.seed(1)` code ensures you and I generate the same "random" data. Change the 1 to another positive integer and you'll get another random set of data.)
 
 ```{r echo=TRUE}
 set.seed(1)
