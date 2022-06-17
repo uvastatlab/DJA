@@ -35,10 +35,6 @@ Every time you modify and save this file, an HTML report is created in the same 
 
 Insert a new R code chunk below and type and run the code: 22/7
 
-```{r}
-22/7
-```
-
 
 ## Import data
 
