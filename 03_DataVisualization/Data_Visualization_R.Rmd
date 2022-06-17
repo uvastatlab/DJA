@@ -29,9 +29,15 @@ You can also press *Ctrl+Enter* (Win/Linux) or *Cmd+Return* (Mac) to run one lin
 
 Add a new R code chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I* (Win/Linux) or *Cmd+Option+I* (Mac).
 
+Every time you modify and save this file, an HTML report is created in the same directory where this file is stored.
+
 ## Code along 0
 
 Insert a new R code chunk below and type and run the code: 22/7
+
+```{r}
+22/7
+```
 
 
 ## Import data
@@ -140,12 +146,6 @@ Do younger (more recently built) houses have a tendency to be bigger than older 
 
 Reminder: Insert a new code chunk by pressing *Ctrl+Alt+I* (Win/Linux) or *Cmd+Option+I* (Mac). 
 
-```{r}
-ggplot(homes) +
-  aes(x = Age, y = FinSqFt) +
-  geom_point(alpha = 1/10)
-```
-
 
 
 ## More aesthetics and geoms, and introducing facets
@@ -202,15 +202,6 @@ Create a scatterplot of TotalValue (y-axis) vs LotSize (x-axis), faceted by HSDi
 
 Reminder: Insert a new code chunk by pressing *Ctrl+Alt+I* (Win/Linux) or *Cmd+Option+I* (Mac). 
 
-```{r}
-ggplot(homes) +
-  aes(x = LotSize, y = TotalValue) +
-  geom_point() +
-  geom_smooth() +
-  facet_wrap(~HSDistrict)
-```
-
-
 
 ## Binning and zooming
 
@@ -258,17 +249,6 @@ ggplot(homes) +
 
 Modify your code from code along 2 to zoom in on the y-axis to see home prices ranging from 0 to `$1,000,000`, and zoom in on the x-axis to view homes on lots ranging in size from 0 to 5 acres. Also use the dollar function to format the home prices on the y-axis.
 
-```{r}
-ggplot(homes) +
-  aes(x = LotSize, y = TotalValue) +
-  geom_point() +
-  geom_smooth() +
-  facet_wrap(~ HSDistrict) +
-  coord_cartesian(xlim = c(0, 5),
-                  ylim = c(0, 1e6)) +
-  scale_y_continuous(labels = dollar)
-
-```
 
 ## Visualizing counts
 
@@ -323,12 +303,6 @@ Given a home's condition, is it more likely to be in a particular high school di
 Create a bar plot of Condition (Condition on x-axis), filled by HSDistrict. Set position = 'fill' so we visualize within each Condition the proportion belonging to a high school district.
 
 Reminder: Insert a new code chunk by pressing *Ctrl+Alt+I* (Win/Linux) or *Cmd+Option+I* (Mac). 
-
-```{r}
-ggplot(homes) +
-  aes(x = Condition, fill = HSDistrict) +
-  geom_bar(position = "fill")
-```
 
 
 ## Numeric values vs groups
@@ -386,15 +360,6 @@ ggplot(homes) +
 How are the ages of homes distributed between the elementary school districts? Are there some elementary schools that serve mostly newer homes? Create a boxplot of Age of home by ESDistrict.
 
 Reminder: Insert a new code chunk by pressing *Ctrl+Alt+I* (Win/Linux) or *Cmd+Option+I* (Mac). 
-
-```{r}
-ggplot(homes) +
-  aes(x = ESDistrict, y = Age) +
-  geom_boxplot() +
-  coord_flip()
-```
-
-
 
 
 ## Line plots over time
@@ -474,13 +439,6 @@ Create a line plot showing how the mean number of FullBaths has changed over tim
 
 Reminder: Insert a new code chunk by pressing *Ctrl+Alt+I* (Win/Linux) or *Cmd+Option+I* (Mac). 
 
-```{r}
-ggplot(homes_mean_fb) +
-  aes(x = YearBuilt, y = FullBath) +
-  geom_line()
-ggplotly()
-```
-
 
 ## A package that extends ggplot2: ggridges
 
@@ -554,7 +512,9 @@ I already downloaded the census tract borders and saved as an rds file for us to
 # alb <- tracts(state = "VA", county = "Albemarle", year = 2019)
 
 # format the internal latitude and longitude values as numeric. These represent
-# the geographic center of each census tract.
+# the geographic center of each census tract. Also set the coordinate reference
+# system to "+proj=longlat +datum=WGS84" (World Geodesic System 1984). This is
+# mainly to supress warnings.
 
 # alb <- alb %>%
 #   mutate(INTPTLON = as.numeric(INTPTLON),
@@ -588,7 +548,29 @@ leaflet(alb) %>%
 ```
 
 
-If we like we can shade the census tract regions according to a summary statistic such as median total value of a home. Let's do that! First we calculate median TotalValue by census tract, and then join with the `alb` data frame.
+## We're done!
+
+If you would like to talk more about ggplot2 or anything else statistics related, I would love to hear from you: `clayford@virginia.edu` or `statlab@virginia.edu`
+
+
+## References
+
+- Wickham, H. (2016), *ggplot2: Elegant Graphics for Data Analysis, 2nd ed*, Springer. https://ggplot2-book.org/ (on-line version of work-in-progress 3rd edition)
+
+- Wickham, H. and Grolemund G. (2017), *R for Data Science*. O'Reilly. http://r4ds.had.co.nz/
+
+- Cheng J, Karambelkar B, Xie Y (2022). _leaflet: Create Interactive Web Maps with the
+  JavaScript 'Leaflet' Library_. R package version 2.1.1,
+  <https://CRAN.R-project.org/package=leaflet>.
+  
+- C. Sievert. Interactive Web-Based Data Visualization with R, plotly, and shiny.
+  Chapman and Hall/CRC Florida, 2020. <https://plotly-r.com/>
+
+
+
+## BONUS: Creating a Choropleth map
+
+If we like we can shade the census tract regions according to a summary statistic such as median total value of a home. This is calle a Choropleth map. First we calculate median TotalValue by census tract, and then join with the `alb` data frame.
 
 
 ```{r}
@@ -624,22 +606,4 @@ leaflet(alb_med_tv) %>%
 
 ```
 
-
-## We're done!
-
-If you would like to talk more about ggplot2 or anything else statistics related, I would love to hear from you: `clayford@virginia.edu` or `statlab@virginia.edu`
-
-
-## References
-
-- Wickham, H. (2016), *ggplot2: Elegant Graphics for Data Analysis, 2nd ed*, Springer. https://ggplot2-book.org/ (on-line version of work-in-progress 3rd edition)
-
-- Wickham, H. and Grolemund G. (2017), *R for Data Science*. O'Reilly. http://r4ds.had.co.nz/
-
--   Cheng J, Karambelkar B, Xie Y (2022). _leaflet: Create Interactive Web Maps with the
-  JavaScript 'Leaflet' Library_. R package version 2.1.1,
-  <https://CRAN.R-project.org/package=leaflet>.
-  
--   C. Sievert. Interactive Web-Based Data Visualization with R, plotly, and shiny.
-  Chapman and Hall/CRC Florida, 2020. <https://plotly-r.com/>
 
