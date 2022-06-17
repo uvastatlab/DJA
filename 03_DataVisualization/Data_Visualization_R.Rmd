@@ -559,13 +559,10 @@ If you would like to talk more about ggplot2 or anything else statistics related
 
 - Wickham, H. and Grolemund G. (2017), *R for Data Science*. O'Reilly. http://r4ds.had.co.nz/
 
-- Cheng J, Karambelkar B, Xie Y (2022). _leaflet: Create Interactive Web Maps with the
-  JavaScript 'Leaflet' Library_. R package version 2.1.1,
-  <https://CRAN.R-project.org/package=leaflet>.
+- Cheng J, Karambelkar B, Xie Y (2022). _leaflet: Create Interactive Web Maps 
+with the JavaScript 'Leaflet' Library_. R package version 2.1.1, <https://CRAN.R-project.org/package=leaflet>.
   
-- C. Sievert. Interactive Web-Based Data Visualization with R, plotly, and shiny.
-  Chapman and Hall/CRC Florida, 2020. <https://plotly-r.com/>
-
+- C. Sievert. Interactive Web-Based Data Visualization with R, plotly, and shiny. Chapman and Hall/CRC Florida, 2020. <https://plotly-r.com/>
 
 
 ## BONUS: Creating a Choropleth map
