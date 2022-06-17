@@ -241,7 +241,7 @@ Variable name definitions:
 
 ## Linear Modeling with Real Estate Data
 
-Let's say we want to model the mean *total value* of a home as a function of various characteristics such as lot size, finished square feet, presence of central air, etc.
+Let's say we want to model the mean Total Value of a home as a function of various characteristics such as lot size, finished square feet, presence of central air, etc.
 
 Let's see how total value is distributed using a histogram. Notice it's very skewed.
 
@@ -275,14 +275,14 @@ coef(m1)
 Our proposed model is as follows:
 
 $$
-\text{Total Value} = -116,101 + 327.9*\text{FinSqFt} + -27,847*\text{Bedroom} + 4515*\text{LotSize}
+\text{Mean TotalValue} = -116,101 + 327.9*\text{FinSqFt} + -27,847*\text{Bedroom} + 4515*\text{LotSize}
 $$
 
 Some naive interpretation:
 
-- each additional finished square foot adds about $327 to price
+- each additional finished square foot adds about $327 to total value
 - each additional Bedroom drops the price by $27,847 (?)
-- each additional lot size acre adds about $4515 to price
+- each additional acre of land adds about $4515 to price
 
 The interpretation assumes _all other variables are held constant_! So adding a Bedroom to a house, without increasing the lot size or finished square feet of the house, is estimated to drop the value of a home. Does this make sense? 
 
@@ -314,7 +314,7 @@ for(i in 1:50)lines(density(sim1[[i]]), col = "blue")
 
 This does not appear to be a good model. In fact some of our simulated values are negative!
 
-Another way to assess fit is plotting _fitted_ values versus _residuals_. Residuals are the observed data minus the fitted data. We can get that plot by using the `plot()` function on our model and specifying `which = 1`. (There are six possible plots.)
+Another way to assess model fit is by plotting _fitted_ values versus _residuals_. Residuals are the observed data minus the fitted data. We can get that plot by using the `plot()` function on our model and specifying `which = 1`. (There are six possible plots.)
 
 ```{r}
 plot(m1, which = 1)
@@ -353,13 +353,13 @@ Let's try modeling log-transformed `TotalValue`.
 m2 <- lm(log(TotalValue) ~ FinSqFt + Bedroom + LotSize, data = homes)
 ```
 
-The diagnostic plot looks somewhat better, though we see we're underfitting some homes. 
+The residual vs fitted plot looks somewhat better, though we see we're underfitting some homes. 
 
 ```{r}
 plot(m2, which = 1)
 ```
 
-But is this a "good model"? Is our proposed model of weighted sums good? Let's simulate data and compare to observed data.
+Let's simulate data and compare to observed data.
 
 ```{r}
 sim2 <- simulate(m2, nsim = 50)
@@ -392,9 +392,8 @@ Remember, the interpretation assumes _all other variables are held constant_!
 
 Increasing something by a percentage is a _multiplicative effect_.
 
-If everyone at a company gets a $100 raise, that's additive.
-
-If everyone at a company gets a 3% raise, that's multiplicative. We multiply the salary by 1.03 to get the new salary.
+- If everyone at a company gets a $100 raise, that's additive.
+- If everyone at a company gets a 3% raise, that's multiplicative. We multiply the salary by 1.03 to get the new salary.
 
 Let's review the summary output:
 
@@ -405,8 +404,11 @@ summary(m2)
 
 SUMMARY OVERVIEW
 
-- Residuals section: quick assessment of residuals. Ideally 1Q/3Q and Min/Max will be roughly equivalent in absolute value.
-- Coefficients: lists the estimated coefficients along with hypothesis tests for the null that each coefficient is 0. Est/SE = t-value. 
+- Estimate: coefficients for the model
+- Std. Error: measures uncertainty of estimate.
+- t value: Estimate/Std. Error (ratio)
+- Pr(>|t|): Probability of t value that large or larger if coefficient = 0
+
 - Residual standard error: estimate of the constant standard deviation of the normal dist'n of the residuals (noise)
 - degrees of freedom: sample size (31324) - number of coefficients (4)
 - R-squared: proportion of variance explained
@@ -430,17 +432,17 @@ m3 <- lm(log(TotalValue) ~ FullBath + FinSqFt, data = homes)
 
 
 
-2. Insert a code chunk below and check the diagnostic plots
+2. Insert a code chunk below and check the Residuals vs Fitted plot
 
 ```{r}
-plot(m3)
+plot(m3, which = 1)
 ```
 
 
 3. How do we interpret the FullBath coefficient?
 
 ```{r}
-exp(coef(m3)) |> round(3)
+round(coef(m3), 3)
 ```
 
 
@@ -462,20 +464,25 @@ Let's add `HSDistrict` to the model we just fit. Does being in a particular high
 table(homes$HSDistrict)
 ```
 
-These levels are not numbers, so how does R handle this in a linear model? It creates a _contrast_. This is a matrix of zeroes and ones. If you have K levels, you'll have K-1 columns. In this case we'll have two columns: one for Monticello HS and one for Western Albemarle HS. By default R takes whatever level comes first alphabetically and makes it the _baseline_ or _reference_ level. 
+HSDistrict does not contain numbers, it contains names. So how can we add it to a linear model? We use indicator variables. We'll add two predictors to our model: 
 
-This is called a _treatment contrast_ and is the default in R.
+- Monticello
+- Western Albemarle
 
-```{r}
-contrasts(factor(homes$HSDistrict))
+We will indicate membership membership in HSDistrict as follows:
+
 ```
-
-A model with `HSDistrict` will have two coefficients: `Monticello` and  `Western Albemarle`
+                  Monticello Western Albemarle
+Albemarle                  0                 0
+Monticello                 1                 0
+Western Albemarle          0                 1
+```
 
 - a home in Albemarle HS district gets two zeroes
 - a home in Monticello HS district gets a one in the Monticello column
 - a home in Western Albemarle HS district gets a one in the West Alb column
 
+Fortunately R takes care of this for us!
 
 Let's fit our new model. (Our model may not be right.)
 
@@ -487,7 +494,7 @@ summary(m4)
 The coefficients for Monticello and Western Albemarle are in relation to Albemarle HS. 
 
 ```{r}
-round(coef(m4),4)
+round(coef(m4),4) * 100
 ```
 
 It appears that the value of a home in Western Albemarle will be about 11% higher than an equivalent home in Albemarle. Likewise it appears that the value of a home in the Monticello district will be about 3% less than an equivalent home in the Albemarle district. 
@@ -505,9 +512,8 @@ m5 <- lm(log(TotalValue) ~ FullBath + FinSqFt + Cooling, data = homes)
 2. What is the interpretation of Cooling? What is the baseline or reference level?
 
 ```{r}
-coef(m5) |> exp() |> round(4)
+round(coef(m5), 4) * 100
 ```
-
 
 
 ## Modeling Interactions
