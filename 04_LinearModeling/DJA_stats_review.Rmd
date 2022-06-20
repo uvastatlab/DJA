@@ -2,7 +2,9 @@
 title: "Some Stats and R Facts"
 author: "Clay Ford"
 date: "Data Justice Academy 2022"
-output: slidy_presentation
+output: 
+    ioslides_presentation:
+      smaller: true
 ---
 
 ```{r setup, include=FALSE}
@@ -10,6 +12,29 @@ knitr::opts_chunk$set(echo = FALSE)
 ```
 
 
+## Hypothesis testing and p-values
+
+Let's say we believe a coin is fair and lands heads 50% of the time.
+
+We flip it 20 times and get 18 heads. That's 90%.
+
+If the coin was really fair, what is the probability of getting 18 or more heads?
+
+The answer is about 0.0002. That's a _p-value_.
+
+That's a small probability and leads us to reject the belief that the coin is fair.
+
+## Hypothesis testing and p-values
+
+What we just described is an example of a _hypothesis test_.
+
+This can be performed for other statistics, such as a difference in means.
+
+The _null hypothesis_ is usually something like no effect, 0, or "no difference in means".
+
+We collect data, calculate our statistic, and then calculate the probability of getting the statistic we obtained (or something more extreme) if the null hypothesis was true.
+
+When you see a p-value, think "probability of the data, or more extreme data, assuming a null hypothesis was true."
 
 ## The Normal Distribution
 
@@ -25,9 +50,9 @@ The mean is the top of the hump (red line). It's the center of the curve. The st
 
 ```{r}
 curve(dnorm(x), from = -3, to = 3, ylab = "")
-abline(v = 0, col = "red")
-abline(v = 1, col = "blue")
-abline(v = -1, col = "blue")
+segments(x0 = 0, y0 = 0, x1 = 0, y1 = dnorm(0), col = "red")
+segments(x0 = 1, y0 = 0, x1 = 1, y1 = dnorm(1), col = "blue")
+segments(x0 = -1, y0 = 0, x1 = -1, y1 = dnorm(-1), col = "blue")
 ```
 
 ## The Normal Distribution
@@ -47,16 +72,16 @@ par(op)
 
 Since the mean and standard deviation completely determine the shape of the curve, we call them _parameters_. Statisticians use the Greek symbols $\mu$ (mu) to represent the mean and $\sigma$ (sigma) to represent the standard deviation. 
 
-Here's the formula to draw the line from the Normal distribution [Wikipedia article](https://en.wikipedia.org/wiki/Normal_distribution). There is nothing "Normal" about it! It looks pretty terrible! Fortunately, unless you teach a statistics class, you don't need to remember it.
+Here's the formula to draw the line from the Normal distribution [Wikipedia article](https://en.wikipedia.org/wiki/Normal_distribution). Fortunately, unless you teach a statistics class, you don't need to remember it.
 
 ![](wikipedia.png)
 
-## The Normal Distribution is a probability distribution
+## The Normal Distribution
 
 Calling the Normal distribution a _probability distribution_ means the area under the curve is equal to 1, or 100%. 
 
 
-## Why do we care about the Normal distribution?
+## Example
 
 Take a look at this histogram of the heights of 250 randomly sampled US males. Most people are between 65 and 75 inches tall. Does the shape look familiar?
 
@@ -66,7 +91,7 @@ heights <- rnorm(n = 250, mean = 69, sd = 3)
 hist(heights, freq = FALSE)
 ```
 
-## The Normal distribution is a good approximation 
+## Example
 
 If we take the mean and standard deviation of our data sample, we can use those values as parameters in a Normal distribution and draw a smooth curve to _approximate_ the distribution.
 
@@ -100,18 +125,20 @@ pnorm(76, mean = mean(heights), sd = sd(heights), lower.tail = FALSE)
 
 0.008 rounds to about 0.01, or 0.01 $\times$ 100 = 1%. It appears there's about a 1% chance (1 in 100) that a randomly selected US male will be taller than 6 feet 4 inches.
 
-## Simulating data from a Normal distribution
 
-I didn't really sample 250 US males and measure their heights. Instead I randomly sampled values from a Normal distribution with mean 69 inches and standard deviation 3 inches. I did that in R using the `rnorm()` function as follows. (The `set.seed(1)` code ensures you and I generate the same "random" data. Change the 1 to another positive integer and you'll get another random set of data.)
+## Simulating data
+
+I didn't really sample 250 US males and measure their heights. Instead I randomly sampled values from a Normal distribution with mean 69 inches and standard deviation 3 inches. I did that in R using the `rnorm()` function as follows. (The optional `set.seed(1)` code ensures you and I generate the same "random" data. Change the 1 to another positive integer and you'll get another random set of data.)
 
 ```{r echo=TRUE}
 set.seed(1)
 heights <- rnorm(n = 250, mean = 69, sd = 3)
 ```
 
+
 ## Data Transformations
 
-Sometimes we transform data to another scale. For example, converting pounds to kilograms. (1 pound = 0.453592 kg) Below is plot of kg versus pounds. Notice how the _distance_ between 20 and 40, and 80 and 100, are _the same within each scale_. This is a _linear_ transformation. 
+Sometimes we transform data to another scale. For example, converting pounds to kilograms. (1 pound = 0.453592 kg) Below is a plot of kg versus pounds. Notice how the _distance_ between 20 and 40, and 80 and 100, are _the same within each scale_. This is a _linear_ transformation. 
 
 ```{r}
 
@@ -139,18 +166,17 @@ Sometimes a transformation is _non-linear_. A common non-linear transformation i
 log(1000)
 ```
 
-The constant $e$ is about 2.71828. $e^{6.907755} = 1000$. We can use the `exp()` function to perform this operation.
+Therefore, $e^{6.907755} = 1000$. (The constant $e$ is about 2.71828.) We can use the `exp()` function to perform this operation.
 
 ```{r echo=TRUE}
-# 2.71828 ^ 6.907755
 exp(6.907755)
 ```
 
-Or close to it, within rounding error. The constant $e$ is an irrational number, like $\pi$, which means its decimals never end and never repeat. The details on how $e$ is derived and why it is important go beyond the scope of these slides, but [read more](https://www.mathsisfun.com/numbers/e-eulers-number.html) if you like.
+Close enough! The constant $e$ is an irrational number, like $\pi$, which means its decimals never end and never repeat. The details on how $e$ is derived and why it is important go beyond the scope of these slides, but [read more](https://www.mathsisfun.com/numbers/e-eulers-number.html) if you like.
 
 ## The log transformation
 
-Below is a plot of the values 1 - 500 and their log transformed values. Notice how the _distance_ between 100 and 200, and 400 and 500, are _NOT the same within each scale_. For example, the distance between 400 and 500 is much smaller on the log scale. This is a _non-linear_ transformation. 
+Below is a plot of the values 1 - 500 and their log transformed values. Notice how the _distance_ between 100 and 200, and 400 and 500, are _NOT the same within each scale_. The distance between 400 and 500 is smaller than the distance between 100 and 200 on the log scale. This is a _non-linear_ transformation. 
 
 ```{r}
 x <- seq(1,500, length.out = 300)
@@ -172,7 +198,7 @@ segments(x0 = 0, y0 = log(500), x1 = 500, y1 = log(500), col = "red")
 
 The log transformation is sometimes useful for transforming skewed data to be more symmetric. This can help with statistical analyses. It spreads out values squished together and brings outlying values closer to the rest of the data. 
 
-```{r}
+```{r }
 op <- par(mfrow = c(1,2))
 og <- rlnorm(1000)
 hist(og, main = "raw data", freq = FALSE, xlab = "", ylab = "")
@@ -183,9 +209,9 @@ par(op)
 
 ## Additive versus Multiplicative effects
 
-If everyone in a company gets a \$500 raise, then the effective is _additive_. Everyone had \$500 added to their pay.
+If everyone in a company gets a \$500 raise, then the effect is _additive_. Everyone had \$500 added to their pay.
 
-If everyone in a company gets a 5% raise, then the effective is _multiplicative_. Everyone had their pay _multiplied_ by 1.05. 
+If everyone in a company gets a 5% raise, then the effect is _multiplicative_. Everyone had their pay _multiplied_ by 1.05. 
 
 Multiplicative examples:
 
@@ -194,10 +220,10 @@ Multiplicative examples:
 
 ## Indexing brackets in R
 
-In R, we can use indexing brackets with a data frame to extract rows, columns, and values.
+In R, we can use _indexing brackets_ with a data frame to extract rows, columns, and values. Let's make a toy data frame for demonstration.
 
 ```{r echo=TRUE}
-d <- data.frame(x = 1:3, y = c("a","a","b"))
+d <- data.frame(x = c(4,7,9), y = c("a","a","b"))
 d
 ```
 
@@ -206,6 +232,9 @@ Extract the value in row 3, column 2:
 ```{r echo=TRUE}
 d[3,2]
 ```
+
+
+## Indexing brackets in R
 
 Extract row 2 (notice we keep the comma):
 
@@ -227,6 +256,9 @@ Notice the result is a vector, not a data frame. If we want the result to remain
 d[,2, drop = FALSE]
 ```
 
+
+## Data frames vs tibbles
+
 That's a difference between data frames and tibbles: tibbles always return data frames when using indexing brackets:
 
 ```{r echo=TRUE}
@@ -234,6 +266,7 @@ d2 <- tibble::as_tibble(d)
 d2[,2]
 ```
 
+Reminder: `tibble::as_tibble()` allows us to use the `as_tibble()` function without loading the tibble package.  
 
 ## Indexing brackets in R
 
@@ -246,7 +279,8 @@ d[[2]]
 
 We can use the name of the column as well:
 
-```{r}
+```{r echo=TRUE}
 d[["y"]]
 ```
 
+Again, the result is a vector. Double brackets do not provide an argument for retaining the data frame structure.
