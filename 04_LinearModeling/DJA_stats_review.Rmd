@@ -126,6 +126,7 @@ pnorm(76, mean = mean(heights), sd = sd(heights), lower.tail = FALSE)
 0.008 rounds to about 0.01, or 0.01 $\times$ 100 = 1%. It appears there's about a 1% chance (1 in 100) that a randomly selected US male will be taller than 6 feet 4 inches.
 
 
+
 ## Simulating data
 
 I didn't really sample 250 US males and measure their heights. Instead I randomly sampled values from a Normal distribution with mean 69 inches and standard deviation 3 inches. I did that in R using the `rnorm()` function as follows. (The optional `set.seed(1)` code ensures you and I generate the same "random" data. Change the 1 to another positive integer and you'll get another random set of data.)
@@ -134,6 +135,8 @@ I didn't really sample 250 US males and measure their heights. Instead I randoml
 set.seed(1)
 heights <- rnorm(n = 250, mean = 69, sd = 3)
 ```
+
+
 
 
 ## Data Transformations

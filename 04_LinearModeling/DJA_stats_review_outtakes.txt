@@ -1,0 +1,44 @@
+## Distribution of Statistics
+
+The previous example was a bit contrived. Raw data is never truly Normally distributed, nor is it necessary.
+
+The reason we care about the Normal distribution is that the _sampling distribution of means_ is approximately Normal. 
+
+## Thought experiment
+
+1. randomly sample data from a population
+2. calculate the mean
+3. repeat steps 2 and 3 many times (like millions) and save all the means
+
+The distribution of the means will be approximately Normal, virtually no matter the distribution of the population.
+
+## Quick demo
+
+This "population" is not Normal. It is Uniform. `runif()` draws random values from a uniform distribution. Every value from `min` to `max` is equally likely. 
+
+```{r echo=TRUE, fig.height=4}
+x <- runif(n = 1e6, min = 1, max = 10)
+hist(x)
+```
+
+## Quick demo
+
+Take 1000 samples of size 30 from the uniform population, take the mean of each sample, and plot distribution. The `replicate()` and `sample()` functions make this pretty easy. The sampling distribution of the means is approximately Normal.
+
+```{r echo=TRUE, fig.height=4}
+means <- replicate(n = 1000, mean(sample(x, 30, replace = TRUE)))
+hist(means)
+```
+
+## Standard error & confidence intervals
+
+The standard deviation of the sampling distribution is called the _standard error_.
+
+Adding and subtracting about 2 standard errors from the mean gives a _confidence interval_.
+
+A confidence interval gives some indication of how uncertain our estimate is. Here we take a single sample of size 30 from our uniform population and use the `t.test()` function to get a 95% confidence interval. The `$conf.int` part extracts the confidence interval.
+
+```{r echo=TRUE}
+sx <- sample(x, size = 30, replace = TRUE)
+t.test(sx)$conf.int
+```

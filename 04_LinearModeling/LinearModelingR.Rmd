@@ -461,7 +461,7 @@ It appears that the value of a home in Western Albemarle will be about 11% highe
 
 In our model above that included `HSDistrict` we assumed we simply had _main effects_. For example, it didn't matter what high school district your home was in, the effect of `FullBath` or `FinSqFt` was the same. It also assumed the effect of each additional `FullBath` was the same regardless of how big the house was, and vice versa. This may be too simple. 
 
-Interactions allow the effects of variables to depend on other variables. Again subject matter knowledge helps with the proposal of interactions. As we'll see interactions make your model more flexible but harder to understand.
+Interactions allow the effects of variables to depend on other variables. Again subject matter knowledge helps with the proposal of interactions. As we'll see interactions make your model more flexible but harder to understand. In general, you need "large" samples to entertain interactions.
 
 R makes it simple to include interactions in models. Just indicate an interaction between two variables by placing a colon (:) between them. Below we include 2-way interactions. (You can have 3-way and higher interactions but they're very difficult to interpret.)
 
