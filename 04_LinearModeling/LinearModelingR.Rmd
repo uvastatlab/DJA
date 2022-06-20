@@ -28,19 +28,6 @@ Every time you modify and save this file, an HTML report is created in the same 
 
 Insert a new R code chunk below and type and run the code: Sys.time()
 
-```{r}
-Sys.time()
-```
-
-## Load packages
-
-We'll use the following packages in this class.
-
-```{r}
-library(ggplot2)
-```
-
-
 
 ## Linear Modeling with Simulated Data
 
@@ -52,9 +39,7 @@ Below we assign to x the values 1 - 25. Then we generate y as a function of x us
 x <- 1:25
 y <- 10 + 5*x  # formula for a line
 d <- data.frame(x, y)
-ggplot(d) +
-  aes(x, y) +
-  geom_point()
+plot(y ~ x, data = d)
 ```
 
 
@@ -70,9 +55,7 @@ set.seed(1)
 noise <- rnorm(n = 25, mean = 0, sd = 10)
 # Add the noise to 10 + 5*x and re-draw plot
 d$y <- 10 + 5*x + noise
-ggplot(d) +
-  aes(x, y) +
-  geom_point()
+plot(y ~ x, data = d)
 ```
 
 Now y appears to be _associated_ with x, but not completely determined by x.
@@ -133,9 +116,8 @@ d$y2 <- 11.135 + 5.042*d$x + rnorm(25, 0, 9.7)
 # plot(d$x, d$y)
 # points(d$x, d$y2, col = "red")
 
-ggplot(d) +
-  geom_point(mapping = aes(x, y)) +
-  geom_point(mapping = aes(x, y2), color = "red")
+plot(y ~ x, data = d)
+points(d$x, d$y2, col = "red")
 ```
 
 That looks pretty good! Our model-generated data appears similar to our observed data.
@@ -171,42 +153,7 @@ The x coefficient says that y increases by about 5 for every one-unit increase i
 
 1. propose and fit a model
 2. determine if the model is useful, is it "good"
-3. use the model to explain relationships, provide advice, and/or make predictions
-
-## CODE ALONG 1
-
-Let's see what happens when we fit a "bad" model. Below we simulate new set of data, like we did above, but this time we have a _non-linear_ relationship.
-
-```{r}
-x <- seq(-10, 10, length.out = 100)
-y <- 2 + -2*x + -5*x^2 + 2+x^3
-set.seed(11)
-noise <- rnorm(n = 100, mean = 0, sd = 120)
-d <- data.frame(x, y = y + noise)
-ggplot(d) +
-  aes(x, y) +
-  geom_point()
-```
-
-1. Model `y` as a function of `x` using `lm(y ~ x, data = d)` and save to an object called `mod2`. View the summary. What formula does the model return? What is the estimated standard deviation of the Normally distributed noise?
-
-```{r}
-mod2 <- lm(y ~ x, data = d)
-summary(mod2)
-```
-
-
-2. Use the summary results to generate a new set of data and name it "y2". Then compare the smooth densities of the observed data and predicted data. How do they compare. 
-
-```{r}
-d$y2 <- -180.855 + 62.076 * d$x + rnorm(100, 0, 247)
-ggplot(d) +
-  geom_point(mapping = aes(x, y)) +
-  geom_point(mapping = aes(x, y2), color = "red")
-
-```
-
-We talk about fitting non-linear effects in the _Non-Linear Effects_ section in the appendix.
+3. use the model to explain relationships, provide advice and/or make predictions
 
 Let's do some linear modeling with real data. 
 
@@ -293,20 +240,20 @@ $$
 
 Some naive interpretation:
 
-- each additional finished square foot adds about $327 to total value
+- each additional finished square foot adds about $328 to total value
 - each additional Bedroom drops the price by $27,847 (?)
 - each additional acre of land adds about $4515 to price
 
 The interpretation assumes _all other variables are held constant_! So adding a Bedroom to a house, without increasing the lot size or finished square feet of the house, is estimated to drop the value of a home. Does this make sense? 
 
-Is this a "good" model? Let's simulate data from the model and compare it to our observed data. A "good" model should generate data that looks similar to the original data. 
+Is this a "good" or "useful" model? Let's simulate data from the model and compare it to our observed data. A "good" model should generate data that looks similar to the original data. 
 
 We could do this by hand:
 
 ```
 sim_value <- -116101.2400  + 327.8906*homes$FinSqFt + 
   -27847.1711*homes$Bedroom + 4515.7094*homes$LotSize + 
-  rnorm(nrow(homes), sd = 249800)
+  rnorm(nrow(homes), mean = 0, sd = 249800)
 ```
 
 An easier and faster way is to use the `simulate()` function which allows you to generate multiple samples. Here we generate 50 samples. Each sample will have the same number of observations as our original sample (n = 31,324). Each sample value is generated using our observed values for `FinSqFt`, `Bedroom`, and `LotSize`. The result is a data frame with 50 columns.
@@ -340,12 +287,12 @@ How to interpret plot:
 - if a residual is negative, that means the observed value is _lower_ than the fitted value. The model over predicts those values.
 - Ideally, residuals will be uniformly clustered around 0 (not the case in this plot!)
 
-By default, the three most "extreme" values are labeled. The house in row 17240 has a fitted value of almost 6 million, but the residual is almost 8 million. This model way underfits this observation. 
+By default, the three most "extreme" values are labeled. The house in row 17896 has a fitted value of about 4 million, but the residual is about 6 million. The model way underfits this observation. 
 
-The observed value of this home is over 13 million.
+The observed value of this home is about 10 million.
 
 ```{r}
-homes[17240, "TotalValue"]
+homes[17896, "TotalValue"]
 ```
 
 This plot reveals that our assumption of a constant standard deviation is highly suspect. Non-constant standard deviation can be evidence of a wrong model or a very skewed response (or a bit of both). Recall that our response is quite skewed:
@@ -366,7 +313,7 @@ Let's try modeling log-transformed `TotalValue`.
 m2 <- lm(log(TotalValue) ~ FinSqFt + Bedroom + LotSize, data = homes)
 ```
 
-The residual vs fitted plot looks somewhat better, though we see we're underfitting some homes. 
+The residual vs fitted plot looks somewhat better, though we see we're overfitting some homes. 
 
 ```{r}
 plot(m2, which = 1)
@@ -382,31 +329,20 @@ for(i in 1:50)lines(density(sim2[[i]]), lty = 2, col = "grey80")
 
 This doesn't look too bad!
 
-Let's say we're happy with this model. How do we interpret the coefficients? Since the response is log transformed, we interpret the coefficients as _approximate proportional differences_. Below we view the coefficients rounded to 4 decimal places.
+Let's say we're happy with this model. How do we interpret the coefficients? When we fit a model with a log transformed dependent variable, we interpret the coefficients as _multiplicative_. Since the response is log transformed, we need to exponentiate the coefficients to return them to the original scale.
 
 
 ```{r}
-round(coef(m2), 4)
+round(exp(coef(m2)), 4)
 ```
 
-These are proportions. To get percentages, multiply by 100.
+Some naive interpretations, recalling the effects are _multiplicative_:
 
-```{r}
-round(coef(m2), 4) * 100
-```
-
-Some naive interpretations:
-
-- each additional finished square foot increases price by 0.04%. 
-- each additional Bedroom increases price by about 3.36%
-- each additional lot size acre increases price by about 0.31%
+- each additional finished square foot increases price by 0.04% (ie, multiply by 1.0004)
+- each additional Bedroom increases price by about 3.4% (ie, multiply by 1.034)
+- each additional lot size acre increases price by about 0.31% (ie, multiply by 1.0031)
 
 Remember, the interpretation assumes _all other variables are held constant_! 
-
-Increasing something by a percentage is a _multiplicative effect_.
-
-- If everyone at a company gets a $100 raise, that's additive.
-- If everyone at a company gets a 3% raise, that's multiplicative. We multiply the salary by 1.03 to get the new salary.
 
 Let's review the summary output:
 
@@ -417,61 +353,60 @@ summary(m2)
 
 SUMMARY OVERVIEW
 
-- Estimate: coefficients for the model
-- Std. Error: measures uncertainty of estimate.
-- t value: Estimate/Std. Error (ratio)
-- Pr(>|t|): Probability of t value that large or larger if coefficient = 0
-
-- Residual standard error: estimate of the constant standard deviation of the normal dist'n of the residuals (noise)
-- degrees of freedom: sample size (31324) - number of coefficients (4)
-- R-squared: proportion of variance explained
+- Each row in the Coefficients section is a hypothesis test that the coefficient is 0. The p-values are virtually 0.
+- Adj R-squared: proportion of variance explained. This model seems to explain about 67% of the variance in TotalValue
 - F-statistic: overall test that all coefficients (except intercept) are 0.
 
-All of the p-values refer to hypothesis tests that the coefficients are 0. Many statisticians and researchers prefer to look at confidence intervals.
+The `confint()` function returns confidence intervals of the estimated coefficients. Think of this is a range of plausible values.
 
 ```{r}
-round(confint(m2) * 100, 4)
+round(exp(confint(m2)), 5)
 ```
 
 According to our model, each additional Bedroom adds between 2.9% and 3.9% to the value of a home, assuming all else held constant.
 
-## CODE ALONG 2
-
-1. Insert a code chunk below and model `log(TotalValue)` as function of `FullBath` and `FinSqFt.` Call your model `m3`
+We can use our model to make predictions. What's the expected mean Total Value for homes with 1800 FinSqFt, 3 bedrooms, on 0.5 acres?
 
 ```{r}
-m3 <- lm(log(TotalValue) ~ FullBath + FinSqFt, data = homes)
+h <- data.frame(FinSqFt = 1800, Bedroom = 3, LotSize = 0.5)
+predict(m2, newdata = h, interval = "confidence")
 ```
 
+The output is on the log scale. We need to exponentiate to get the estimate in dollar amounts.
+
+```{r}
+exp(predict(m2, newdata = h, interval = "confidence"))
+```
+
+That's the _expected mean value_. If we wanted to predict the price of a specific home with those characteristics, our prediction is more uncertain. We can estimate that uncertainty using interval = "prediction".
+
+```{r}
+exp(predict(m2, newdata = h, interval = "prediction"))
+
+```
+
+This is a much wider interval. We're much more uncertain about predicting a specific value than we are about predicting a mean value.
+
+
+## CODE ALONG 1
+
+1. Insert a code chunk below and model `log(TotalValue)` as function of `FullBath` and `FinSqFt.` Call your model `m3`
 
 
 2. Insert a code chunk below and check the Residuals vs Fitted plot
 
-```{r}
-plot(m3, which = 1)
-```
-
 
 3. How do we interpret the FullBath coefficient?
 
-```{r}
-round(coef(m3), 3)
-```
 
+4. Insert a code chunk below and simulate data from the model and compare to the observed `TotalValue`. Call the simulated data "sim3". Does this look like a good model?
 
-4. Insert a code chunk below and simulate data from the model and compare to the observed `TotalValue`. Does this look like a good model?
-
-```{r}
-sim3 <- simulate(m3, nsim = 50)
-plot(density(log(homes$TotalValue)))
-for(i in 1:50)lines(density(sim2[[i]]), lty = 2, col = "grey80")
-```
 
 
 
 ## Categorical predictors
 
-Let's add `HSDistrict` to the model we just fit. Does being in a particular high school district affect total value of a home? Here's a quick tally:
+Let's add `HSDistrict` to the model we just fit in the previous code along. Does being in a particular high school district affect total value of a home? Here's a quick tally:
 
 ```{r}
 table(homes$HSDistrict)
@@ -497,7 +432,7 @@ Western Albemarle          0                 1
 
 Fortunately R takes care of this for us!
 
-Let's fit our new model. (Our model may not be right.)
+Let's fit our new model. (Our model may not be useful.)
 
 ```{r}
 m4 <- lm(log(TotalValue) ~ FullBath + FinSqFt + HSDistrict, data = homes)
@@ -507,31 +442,24 @@ summary(m4)
 The coefficients for Monticello and Western Albemarle are in relation to Albemarle HS. 
 
 ```{r}
-round(coef(m4),4) * 100
+round(exp(coef(m4)),4)
 ```
 
 It appears that the value of a home in Western Albemarle will be about 11% higher than an equivalent home in Albemarle. Likewise it appears that the value of a home in the Monticello district will be about 3% less than an equivalent home in the Albemarle district. 
 
-## CODE ALONG 3
+## CODE ALONG 2
 
 1. Insert a code chunk below and model `log(TotalValue)` as function of `FullBath`, `FinSqFt` and `Cooling.` Call your model `m5`. 
-
-```{r}
-m5 <- lm(log(TotalValue) ~ FullBath + FinSqFt + Cooling, data = homes)
-```
 
 
 
 2. What is the interpretation of Cooling? What is the baseline or reference level?
 
-```{r}
-round(coef(m5), 4) * 100
-```
 
 
 ## Modeling Interactions
 
-In our model above that included `HSDistrict` we assumed the effects were _additive_. For example, it didn't matter what high school district your home was in, the effect of `FullBath` or `FinSqFt` was the same. It also assumed the effect of each additional `FullBath` was the same regardless of how big the house was, and vice versa. This may be too simple. 
+In our model above that included `HSDistrict` we assumed we simply had _main effects_. For example, it didn't matter what high school district your home was in, the effect of `FullBath` or `FinSqFt` was the same. It also assumed the effect of each additional `FullBath` was the same regardless of how big the house was, and vice versa. This may be too simple. 
 
 Interactions allow the effects of variables to depend on other variables. Again subject matter knowledge helps with the proposal of interactions. As we'll see interactions make your model more flexible but harder to understand.
 
@@ -546,7 +474,7 @@ summary(m6)
 
 Interpretation is now much more difficult. We cannot directly interpret the _main effects_ of `FullBath`, `FinSqFt` or `HSDistrict`. They interact. What's the effect of `FinSqFt`? It depends on `FullBath` and `HSDistrict`. 
 
-Are the interactions "significant" or necessary? Use the `anova` function to evaluate this question:
+Are the interactions "significant" or necessary? Use the `anova()` function to evaluate this question. Each row below is a hypothesis test that the term explains 0 variance in total value, given everything listed before it is in the model.
 
 ```{r}
 anova(m6)
@@ -589,22 +517,14 @@ plot(ggpredict(m6, terms = c("FinSqFt[1000:4000 by=500]", "FullBath[2:5]")))
 
 The effect of `FinSqFt` seems to taper off the more FullBaths a house has. But there are few large homes with 2 full baths, and likewise, few small homes with 5 full baths. Even though the interaction is "significant" in the model, it's clearly a very small interaction.
 
-## CODE ALONG 4
+## CODE ALONG 3
 
 1. Insert a code chunk below and model `log(TotalValue)` as function of `FullBath`, `FinSqFt`, `Cooling`, and the interaction of `FinSqFt` and `Cooling`. Call your model `m7`. Is the interaction warranted?
 
-```{r}
-m7 <- lm(log(TotalValue) ~ FullBath + FinSqFt + Cooling + FinSqFt:Cooling, 
-         data = homes)
-anova(m7)
-```
 
 
 2. Visualize the interaction using the `ggpredict` function. Perhaps use `[1000:4000 by=500]` to set the range of `FinSqFt` on the x-axis.
 
-```{r}
-plot(ggpredict(m7, terms = c("FinSqFt[1000:4000 by=500]", "Cooling")))
-```
 
 
 
@@ -626,7 +546,7 @@ Things get more complicated when you have, say, binary responses or multiple mea
 **References**
 
 - Faraway, J. (2005). _Linear Models in R_. London: Chapman & Hall.
-- Fox, J. (2002). _A R and S-Plus Companion to Applied Regression_. London: Sage.
+- Fox, J., Weisberg, S. (2019). _A R Companion to Applied Regression_. London: Sage.
 - Harrell, F. (2015). _Regression Modeling Strategies_ (2nd ed.). New York: Springer.
 - Kutner, M., et al. (2005). _Applied Linear Statistical Models_ (5th ed.). New York: McGraw-Hill.
 - Maindonald J., Braun, J.W. (2010). _Data Analysis and Graphics Using R_ (3rd ed.). Cambridge: Cambridge Univ Press.
