@@ -287,7 +287,7 @@ How to interpret plot:
 - if a residual is negative, that means the observed value is _lower_ than the fitted value. The model over predicts those values.
 - Ideally, residuals will be uniformly clustered around 0 (not the case in this plot!)
 
-By default, the three most "extreme" values are labeled. The house in row 17896 has a fitted value of about 4 million, but the residual is about 6 million. The model way underfits this observation. 
+By default, the three most "extreme" values are labeled. The house in row 17896 has a fitted value of about 4 million, but the residual is about 6 million. The model way under predicts this observation. 
 
 The observed value of this home is about 10 million.
 
@@ -313,7 +313,7 @@ Let's try modeling log-transformed `TotalValue`.
 m2 <- lm(log(TotalValue) ~ FinSqFt + Bedroom + LotSize, data = homes)
 ```
 
-The residual vs fitted plot looks somewhat better, though we see we're overfitting some homes. 
+The residual vs fitted plot looks somewhat better, though we see we're way over-predicting values for some homes. 
 
 ```{r}
 plot(m2, which = 1)
@@ -637,27 +637,10 @@ plot(density(log(homes$TotalValue)))
 for(i in 1:50)lines(density(sim4[[i]]), col = "grey80")
 ```
 
-We should still check model assumptions of constant variance and normal residuals.
+We should still check model assumption of constant variance.
 
 ```{r}
-plot(nlm3)
-```
-
-Homes 13276, 15097, 19047, 19941, 24355, and 17241 are identified in the diagnostic plots. Let's have a look.
-
-```{r}
-h <- c(13276, 15097, 19047, 19941, 24355, 17241)
-homes[h,c("TotalValue", "FinSqFt", "LotSize")]
-```
-
-- Homes 13276, 19047 and 19941 have tiny TotalValues relative to their FinSqFt. Are these typos?
-- Home 24355 has an enormous LotSize!
-- Homes 17241 and 15097 have massive FinSqFt values. 
-
-Let's compare observed and fitted values. Notice the first five homes have fits that are way too big. The 5th home has a fitted value over `$127,000,000`! The last home is underfit by about `$10,000,000`.
-
-```{r}
-cbind(obs = homes$TotalValue[h], fit = exp(fitted(nlm3)[h]))
+plot(nlm3, which = 1)
 ```
 
 
@@ -670,9 +653,6 @@ cbind(obs = homes$TotalValue[h], fit = exp(fitted(nlm3)[h]))
 
 
 3. Create an effect plot of `FinSqFt` by `Cooling`. Maybe try `[1000:5000 by=250]` for the range of values for `FinSqFt`.
-
-4. Check the graphical model assumptions using the `plot` function.
-
 
 
 5. How well does the distribution of the model-generated data match the distribution of the observed data?
